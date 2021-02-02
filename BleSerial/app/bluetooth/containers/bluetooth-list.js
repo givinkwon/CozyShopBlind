@@ -21,7 +21,7 @@ function BluetoothList(props){
     
     useEffect(()=>{
 
-        async function init(){
+        function init(){
             
             if (Platform.OS === 'android' && Platform.Version >= 23){
                 PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
@@ -75,7 +75,7 @@ function BluetoothList(props){
             setBolEnable(true);
             console.log("Can Use Bluetooth");
             const list = await BluetoothSerial.list();
-            console.log("Pairing device: ", list);
+            // console.log("Pairing device: ", list);
             setList(list);
             const unpairedDevice = await BluetoothSerial.discoverUnpairedDevices();
             await BluetoothSerial.stopScanning();
@@ -85,7 +85,6 @@ function BluetoothList(props){
 
             unpairedDevice.forEach((element) => {
                 if(element.name != null){
-                    console.log(element);
                     temp.push(element);
                 }
             });
@@ -105,6 +104,7 @@ function BluetoothList(props){
                 }
             });
             setUnpairedList(unpairedList);
+            console.log("End of discovering unpaired device");
         } catch (error) {
             console.log(error);
         }
@@ -121,10 +121,22 @@ function BluetoothList(props){
             console.log(error);
         }
     };
+   
+    const connectTo = async (deviceId) => {
+        //console.log("Id: ", deviceId);
+        console.log("Press");
+        console.log("For pairing device id: ", deviceId);
+        console.log(typeof(deviceId));
+        const device = await BluetoothSerial.connect(deviceId);
+        console.log("pairing");
+        console.log(device);
+
+    }
 
     const renderEmpty = () => <Empty text='주변기기 없음' />
     const renderItem = ({item}) => {
-        return <Device {...item} iconLeft={require('../../icons/ic_laptop.png')} iconRight={require('../../icons/ic_settings.png')} />
+        //console.log("item:" ,item);
+        return <Device {...item} iconLeft={require('../../icons/ic_laptop.png')} iconRight={require('../../icons/ic_settings.png')} onPress={() => connectTo(item.id)}/>
     };
 
     const toggleBluetooth = value => {

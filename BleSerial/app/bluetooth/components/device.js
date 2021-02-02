@@ -11,7 +11,7 @@ import Separator from './separator';
 function Device(props){
     return(
         <>
-            <TouchableOpacity style={styles.wrapper} onPree={props.onPress}>
+            <TouchableOpacity style={styles.wrapper} onPress={props.onPress}>
                 <View style={styles.wrapperLeft}>
                     <Image style={styles.iconLeft} source={props.iconLeft} />
                 </View>
