@@ -14,7 +14,8 @@ import { FlatList,
     Image,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import Icon from 'react-native-vector-icons/AntDesign'
+import Icon from 'react-native-vector-icons/AntDesign';
+import { stringToBytes } from 'convert-string';
 
 
 const window = Dimensions.get('window');
@@ -29,12 +30,18 @@ class BluetoothScreen extends Component {
         this.state = {
             scanning: false,
             peripherals: new Map(),
-            appState: ''
+            appState: '',
+            connected: false,
+            connectedDeviceId: '',
         }
         this.handleAppStateChange = this.handleAppStateChange.bind(this);
         this.handleStopScan = this.handleStopScan.bind(this);
         this.handleDiscoverPeripheral = this.handleDiscoverPeripheral.bind(this);
+
     }
+
+    
+
 
     componentDidMount(){
         console.log("===== Start componentDidMount =====");
@@ -100,7 +107,7 @@ class BluetoothScreen extends Component {
         BleManager.enableBluetooth().then(()=>{
             if(!this.state.scanning){
                 this.setState({peripherals: new Map()});
-                BleManager.scan([], 5, false).then((results) => {
+                BleManager.scan([], 10, false).then((results) => {
                     console.log('Scanning...');
                     this.setState({scanning: true});
                 })
@@ -117,29 +124,87 @@ class BluetoothScreen extends Component {
         var peripherals = this.state.peripherals;
         //console.log('Got ble peripheral', peripheral);
         if (!peripheral.name) {
-            peripheral.name = '이름 없음';
+            return;
         }
         peripherals.set(peripheral.id, peripheral);
         this.setState({ peripherals });
     }
 
+    handleDataTransfer(deviceId){
+        BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
+            console.log("Peripheral info: ", peripheralInfo);
+            const sendData = stringToBytes("$AUTOU;");
+
+            const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
+            const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
+
+
+            console.log("service uuid: ", serviceUUID);
+            console.log("characteristic uuid: ", characteristicUUID);
+        
+            BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
+               console.log("Write: ", sendData); 
+            })
+            .catch((error) => {
+                console.log("Write Error: ", error);
+            });
+        })
+        .catch((error) => {
+            console.log("RetrieveServices Error: ", error);
+        });
+        
+        
+    }
+
+
+    handleDisconnect(deviceId){
+        BleManager.disconnect(deviceId).then(() => {
+            console.log("disconnected");
+            var connected = this.state.connected;
+            connected = false;
+            this.setState({ connected });
+        })
+        .catch((error) => {
+            console.log("Disconnect Error : ", error);
+        });
+    }
+
     handleConnect(peripheral){
-        if (peripheral){
-            if(peripheral.connected){
-                BleManager.disconnect(peripheral.id);
-                console.log(peripheral);
-            } else{
-                BleManager.connect(peripheral.id).then(() => {
-                    console.log("Connect");
-                    console.log(peripheral);
-                });
-            }
+        if(!this.state.connected){
+            BleManager.connect(peripheral.id).then(() => {
+                console.log("connected");
+                var connected = this.state.connected;
+                connected = true;
+                this.setState({ connected });
+                this.handleDataTransfer(peripheral.id);
+            })
+            .catch((error) => {
+                console.log("Connect Error: ", error);
+                this.handleDisconnect(peripheral.id);
+            })
+        } else{
+            this.handleDisconnect(peripheral.id);
         }
+        // BleManager.connect(peripheral.id).then(() => {
+        //     console.log("connected");
+        // })
+        // .catch((error) => {
+        //     console.log(error);
+        // });
+
+        // BleManager.isPeripheralConnected(peripheral.id, []).then((isConnected) => {
+        //     if (isConnected) {
+        //         console.log("Peripheral is Connected");
+        //         var connected = this.state.connected;
+        //         connected = true;
+        //         this.setState({ connected });
+        //     }
+        // });
     }
 
     renderItem(item) {
         //const color = item.connected ? 'green' : '#ffffff';
-        if(item.name !== '이름 없음'){
+        if(item.name !== null){
             return(
                 <TouchableOpacity onPress={()=> this.handleConnect(item) }>
                     <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
