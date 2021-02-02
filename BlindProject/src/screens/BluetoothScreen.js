@@ -11,6 +11,7 @@ import { FlatList,
     AppState,
     Platform,
     PermissionsAndroid,
+    Image,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import Icon from 'react-native-vector-icons/AntDesign'
@@ -114,7 +115,7 @@ class BluetoothScreen extends Component {
 
     handleDiscoverPeripheral(peripheral){
         var peripherals = this.state.peripherals;
-        console.log('Got ble peripheral', peripheral);
+        //console.log('Got ble peripheral', peripheral);
         if (!peripheral.name) {
             peripheral.name = '이름 없음';
         }
@@ -122,35 +123,43 @@ class BluetoothScreen extends Component {
         this.setState({ peripherals });
     }
 
-    handleConnect(){
-        if (!this.scanning){
-            this.props.navigation.navigate('Main');
+    handleConnect(peripheral){
+        if (peripheral){
+            if(peripheral.connected){
+                BleManager.disconnect(peripheral.id);
+                console.log(peripheral);
+            } else{
+                BleManager.connect(peripheral.id).then(() => {
+                    console.log("Connect");
+                    console.log(peripheral);
+                });
+            }
         }
     }
 
     renderItem(item) {
         //const color = item.connected ? 'green' : '#ffffff';
-        if(item.name === '이름 없음'){
-            return (
-                <TouchableOpacity onPress={()=> this.handleConnect() }>
-                    <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
-                        <Text style={{fontSize: 15, textAlign: 'center', color: '#333333', padding: 10, fontWeight: 'bold', color: 'white'}}>{item.id}</Text>
-                        <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, paddingBottom: 20, fontWeight: 'bold', color: 'white'}}>RSSI: {item.rssi}</Text>
-                    </View>
-                </TouchableOpacity>
-            );
-        } else {
+        if(item.name !== '이름 없음'){
             return(
-                <TouchableOpacity onPress={()=> this.handleConnect() }>
+                <TouchableOpacity onPress={()=> this.handleConnect(item) }>
                     <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
                         <Text style={{fontSize: 15, textAlign: 'center', color: '#333333', padding: 10, fontWeight: 'bold', color: 'white'}}>{item.name}</Text>
                         <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, fontWeight: 'bold', color: 'white'}}>RSSI: {item.rssi}</Text>
                         <Text style={{fontSize: 8, textAlign: 'center', color: '#333333', padding: 2, paddingBottom: 20, fontWeight: 'bold', color: 'white'}}>{item.id}</Text>
                     </View>
                 </TouchableOpacity>
-            )
-            
+            );
         }
+        //else {
+        //     return(
+        //         <TouchableOpacity onPress={()=> this.handleConnect() }>
+        //             <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
+        //                 <Text style={{fontSize: 15, textAlign: 'center', color: '#333333', padding: 10, fontWeight: 'bold', color: 'white'}}>{item.id}</Text>
+        //                 <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, paddingBottom: 20, fontWeight: 'bold', color: 'white'}}>RSSI: {item.rssi}</Text>
+        //             </View>
+        //         </TouchableOpacity>
+        //     );
+        // } 
       }
 
     render(){
@@ -162,7 +171,8 @@ class BluetoothScreen extends Component {
                 <View style={styles.content}>
                     <ScrollView style={styles.scroll}>
                         {(list.length == 0) &&
-                            <View style={{flex:1, margin: 20,}}>
+                            <View style={{flex: 1, margin: 20}}>
+                                <Image style={styles.image} source={require('../pic/ic_empty.png')} />
                                 <Text style={{textAlign: 'center', fontSize: 30}}>주변기기 없음</Text>
                             </View>
                         }
@@ -209,8 +219,9 @@ const styles = StyleSheet.create({
         //backgroundColor: '#aeaeae',
     },
     scroll:{
-        flex: 1,
-        width: '80%',
+        // flex: 1,
+        width: '90%',
+        height: '100%',
     },
     button: {
         width: '100%',
@@ -219,12 +230,14 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: 'steelblue',
         borderRadius: 50,
-        paddingTop: 10,
-        paddingBottom: 10,
-        paddingLeft: 15,
-        paddingRight: 15,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
         alignItems: 'center',
         justifyContent: 'space-around',
+    },
+    image:{
+        width: '100%',
+        resizeMode: 'contain',
     }
 })
 
