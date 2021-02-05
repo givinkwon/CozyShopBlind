@@ -40,9 +40,6 @@ class BluetoothScreen extends Component {
 
     }
 
-    
-
-
     componentDidMount(){
         console.log("===== Start componentDidMount =====");
 
@@ -57,48 +54,80 @@ class BluetoothScreen extends Component {
         
 
         if (Platform.OS === 'android' && Platform.Version >= 29) {
-            PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
-                if (result) {
-                    console.log("Permission is OK");
-                } else {
-                    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
-                        if (result) {
-                            console.log("User accept");
-                        } else {
-                            console.log("User refuse");
-                        }
-                    });
-                }
-          });
+            this.getAndroidPermission(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
         }
 
         if (Platform.OS === 'android' && Platform.Version >= 23 && Platform.Version <= 28) {
-            PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then((result) => {
-                if (result) {
-                    console.log("Permission is OK");
-                } else {
-                    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION).then((result) => {
-                        if (result) {
-                            console.log("User accept");
-                        } else {
-                            console.log("User refuse");
-                        }
-                    });
-                }
-          });
+            this.getAndroidPermission(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
         }
+
+        BleManager.getBondedPeripherals([]).then((devices) => {
+            if(devices.length != 0){
+                devices.forEach((device) => {
+                    console.log("Bonded Device INFO: ", device);
+                });
+            } else {
+                console.log("No Bonded Device");
+            }
+        })
+        .catch((err) => {
+            console.log("Get Bonded Peripherals Error: ", err);
+        });
+
+        // const getBondedDevice = async () => {
+        //     try{
+        //         const devices = await BleManager.getBondedPeripherals([]);
+        //         if(devices.length != 0){
+        //             devices.forEach((device) => {
+        //                 console.log("Bonded Device INFO: ", device);
+        //             });
+        //         } else {
+        //             console.log("No Bonded Device");
+        //         }
+        //         console.log("try End");
+        //         console.log(devices);
+        //     } catch(err) {
+        //         console.log("Get Bonded Peripherals Error: ", err);
+        //     }
+        // };
+
+        // getBondedDevice();
+        
     }
 
     componentWillUnmount() {
         this.handlerDiscover.remove();
     }
 
+    getAndroidPermission(per){
+        PermissionsAndroid.check(per).then((result) =>{
+            if (result){
+                console.log("Permission is OK")
+            } else {
+                PermissionsAndroid.request(per).then((result) => {
+                    if (result) {
+                        console.log("User accept permission");
+                    } else {
+                        console.log("User reject permission");
+                    }
+                })
+            }
+        });
+    }
+
     handleAppStateChange(nextAppState) {
         if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
             console.log('App has come to the foreground!')
             BleManager.getConnectedPeripherals([]).then((peripheralsArray) => {
-                console.log('Connected peripherals: ' + peripheralsArray.length);
+                peripheralsArray.forEach((device) => {
+                    console.log("Connected Device: " , device);
+                });
             });
+            BleManager.getBondedPeripherals([]).then((bondedDevice) => {
+                bondedDevice.forEach((device) => {
+                    console.log("Bonded Device: ", device);
+                })
+            })
         }
         this.setState({appState: nextAppState});
     }
@@ -133,11 +162,10 @@ class BluetoothScreen extends Component {
     handleDataTransfer(deviceId){
         BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
             console.log("Peripheral info: ", peripheralInfo);
-            const sendData = stringToBytes("$AUTOU;");
+            const sendData = stringToBytes("Hello Arduino");
 
             const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
             const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
-
 
             console.log("service uuid: ", serviceUUID);
             console.log("characteristic uuid: ", characteristicUUID);
@@ -176,30 +204,28 @@ class BluetoothScreen extends Component {
                 var connected = this.state.connected;
                 connected = true;
                 this.setState({ connected });
-                this.handleDataTransfer(peripheral.id);
+                //this.handleDataTransfer(peripheral.id);
+                BleManager.createBond(peripheral.id, "000000").then(() => {
+                    console.log("create bond success or there is already an existing one");
+                })
+                .catch((error) => {
+                    console.log("fail to bond[" + error + "]")
+                    this.handleDisconnect(peripheral.id);
+                });
             })
             .catch((error) => {
                 console.log("Connect Error: ", error);
                 this.handleDisconnect(peripheral.id);
-            })
+            });
         } else{
+            BleManager.removeBond(peripheral.id).then(() => {
+                console.log("Remove bonded device success");
+            })
+            .catch((error) => {
+                console.log("Remove Bond Error: ", error);
+            });
             this.handleDisconnect(peripheral.id);
         }
-        // BleManager.connect(peripheral.id).then(() => {
-        //     console.log("connected");
-        // })
-        // .catch((error) => {
-        //     console.log(error);
-        // });
-
-        // BleManager.isPeripheralConnected(peripheral.id, []).then((isConnected) => {
-        //     if (isConnected) {
-        //         console.log("Peripheral is Connected");
-        //         var connected = this.state.connected;
-        //         connected = true;
-        //         this.setState({ connected });
-        //     }
-        // });
     }
 
     renderItem(item) {
