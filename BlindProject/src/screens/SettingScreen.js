@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import HomeButton from '../components/HomeButton';
 import SettingButton from '../components/SettingButton';
+import BluetoothButton from '../components/BluetoothButton';
 
 
 class SettingScreen extends Component{
@@ -12,6 +13,10 @@ class SettingScreen extends Component{
 
     handleSettingButton(){
         this.props.navigation.navigate("Setting");
+    }
+        
+    handleBluetoothButton(){
+        this.props.navigation.navigate("Bluetooth");
     }
 
     render(){
@@ -49,6 +54,7 @@ class SettingScreen extends Component{
                 </View>
                 <View style={styles.footer}>
                     <HomeButton onPress={this.handleHomeButton.bind(this)}/>
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} />
                     <SettingButton onPress={this.handleSettingButton.bind(this)}/>
                 </View>
             </View>

@@ -4,6 +4,7 @@ import HomeButton from '../components/HomeButton';
 import SettingButton from '../components/SettingButton';
 import UpButton from '../components/UpButton';
 import DownButton from '../components/DownButton';
+import Bluetoothbutton from '../components/BluetoothButton';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 class InitScreen extends Component {
@@ -14,6 +15,10 @@ class InitScreen extends Component {
 
     handleSettingButton(){
         this.props.navigation.navigate("Setting");
+    }
+    
+    handleBluetoothButton(){
+        this.props.navigation.navigate("Bluetooth");
     }
 
 
@@ -65,6 +70,7 @@ class InitScreen extends Component {
                 </View>
                 <View style={styles.footer}>
                     <HomeButton onPress={this.handleHomeButton.bind(this)}/>
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} />
                     <SettingButton onPress={this.handleSettingButton.bind(this)}/>
                 </View>
             </View>

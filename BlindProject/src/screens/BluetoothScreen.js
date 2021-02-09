@@ -15,6 +15,7 @@ import { FlatList,
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import Icon from 'react-native-vector-icons/AntDesign';
+import ConnectMoal from '../components/ConnectModal';
 import { stringToBytes } from 'convert-string';
 
 
@@ -29,10 +30,13 @@ class BluetoothScreen extends Component {
         super(props);
         this.state = {
             scanning: false,
-            peripherals: new Map(),
-            appState: '',
             connected: false,
+            modalVisible: false,
+            peripherals: new Map(),
             connectedDeviceId: '',
+            selDeviceName: '',
+            selDeviceRssi: 0,
+            appState: '',
         }
         this.handleAppStateChange = this.handleAppStateChange.bind(this);
         this.handleStopScan = this.handleStopScan.bind(this);
@@ -52,7 +56,6 @@ class BluetoothScreen extends Component {
         this.handlerDiscover = bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', this.handleDiscoverPeripheral);
         this.handlerStop = bleManagerEmitter.addListener('BleManagerStopScan', this.handleStopScan);
         
-
         if (Platform.OS === 'android' && Platform.Version >= 29) {
             this.getAndroidPermission(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
         }
@@ -180,10 +183,7 @@ class BluetoothScreen extends Component {
         .catch((error) => {
             console.log("RetrieveServices Error: ", error);
         });
-        
-        
     }
-
 
     handleDisconnect(deviceId){
         BleManager.disconnect(deviceId).then(() => {
@@ -198,34 +198,38 @@ class BluetoothScreen extends Component {
     }
 
     handleConnect(peripheral){
-        if(!this.state.connected){
-            BleManager.connect(peripheral.id).then(() => {
-                console.log("connected");
-                var connected = this.state.connected;
-                connected = true;
-                this.setState({ connected });
-                //this.handleDataTransfer(peripheral.id);
-                BleManager.createBond(peripheral.id, "000000").then(() => {
-                    console.log("create bond success or there is already an existing one");
-                })
-                .catch((error) => {
-                    console.log("fail to bond[" + error + "]")
-                    this.handleDisconnect(peripheral.id);
-                });
-            })
-            .catch((error) => {
-                console.log("Connect Error: ", error);
-                this.handleDisconnect(peripheral.id);
-            });
-        } else{
-            BleManager.removeBond(peripheral.id).then(() => {
-                console.log("Remove bonded device success");
-            })
-            .catch((error) => {
-                console.log("Remove Bond Error: ", error);
-            });
-            this.handleDisconnect(peripheral.id);
-        }
+        const visible = this.modalVisible;
+        // if(!this.state.connected){
+        //     BleManager.connect(peripheral.id).then(() => {
+        //         console.log("connected");
+        //         var connected = this.state.connected;
+        //         connected = true;
+        //         this.setState({ connected });
+        //         //this.handleDataTransfer(peripheral.id);
+        //         BleManager.createBond(peripheral.id, "000000").then(() => {
+        //             console.log("create bond success or there is already an existing one");
+        //         })
+        //         .catch((error) => {
+        //             console.log("fail to bond[" + error + "]")
+        //             this.handleDisconnect(peripheral.id);
+        //         });
+        //     })
+        //     .catch((error) => {
+        //         console.log("Connect Error: ", error);
+        //         this.handleDisconnect(peripheral.id);
+        //     });
+        // } else{
+        //     BleManager.removeBond(peripheral.id).then(() => {
+        //         console.log("Remove bonded device success");
+        //     })
+        //     .catch((error) => {
+        //         console.log("Remove Bond Error: ", error);
+        //     });
+        //     this.handleDisconnect(peripheral.id);
+        // }
+        this.setState({ selDeviceName: peripheral.name });
+        this.setState({ selDeviceRssi: peripheral.rssi });
+        this.setModalVisible(!visible);
     }
 
     renderItem(item) {
@@ -251,7 +255,23 @@ class BluetoothScreen extends Component {
         //         </TouchableOpacity>
         //     );
         // } 
-      }
+    }
+    
+    setModalVisible = (visible) => {
+        this.setState({ modalVisible: visible });
+    }
+    
+    onPressPositive = () => {
+        const visible = this.state.modalVisible;
+        //console.log("넹");
+        this.setModalVisible(!visible);
+    }
+
+    onPressNegative = () => {
+        const visible = this.state.modalVisible;
+        //console.log("아니요");
+        this.setModalVisible(!visible);
+    }
 
     render(){
         const list = Array.from(this.state.peripherals.values());
@@ -259,6 +279,14 @@ class BluetoothScreen extends Component {
 
         return(
             <View style={styles.container}>
+                <ConnectMoal
+                    modalVisible={this.state.modalVisible}
+                    setModalVisible={this.setModalVisible.bind(this)}
+                    deviceName={this.state.selDeviceName}
+                    rssi={this.state.selDeviceRssi}
+                    onPressPositive={this.onPressPositive.bind(this)}
+                    onPressNegative={this.onPressNegative.bind(this)}
+                />
                 <View style={styles.content}>
                     <ScrollView style={styles.scroll}>
                         {(list.length == 0) &&
@@ -294,6 +322,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#ffffff',
     },
     content:{
         height: '80%',
