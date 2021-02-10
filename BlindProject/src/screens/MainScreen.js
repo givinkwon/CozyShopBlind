@@ -48,8 +48,8 @@ class MainScreen extends Component {
                 </View>
                 <View style={styles.footer}>
                     <HomeButton onPress={this.handleHomeButton.bind(this)} isSelected={true} />
-                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSeleceted={false} />
-                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSeleceted={false} />
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSelected={false} />
+                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSelected={false} />
                 </View>
             </View>
         );

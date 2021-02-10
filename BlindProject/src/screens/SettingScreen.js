@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import UpButton from '../components/UpButton';
+import DownButton from '../components/DownButton';
 import HomeButton from '../components/HomeButton';
-import SettingButton from '../components/SettingButton';
 import BluetoothButton from '../components/BluetoothButton';
+import SettingButton from '../components/SettingButton';
+import Icon from 'react-native-vector-icons/AntDesign';
 
-
-class SettingScreen extends Component{
+class SettingScreen extends Component {
 
     handleHomeButton(){
         this.props.navigation.navigate("Main");
@@ -14,7 +16,7 @@ class SettingScreen extends Component{
     handleSettingButton(){
         this.props.navigation.navigate("Setting");
     }
-        
+    
     handleBluetoothButton(){
         this.props.navigation.navigate("Bluetooth");
     }
@@ -23,38 +25,51 @@ class SettingScreen extends Component{
         return (
             <View style={styles.container}>
                 <View style={styles.content}>
-
-                    <View style={styles.image}>
-                        <Text>코지샵 설명 및 이미지</Text>
-                        <Image source={{uri:'https://image-se.ycrowdy.com/20200720/CROWDY_0_202007201010390054_BNSzTGL5TF.jpg'}}
-                        style={{width:'100%', height:'100%', resizeMode: 'contain'}}/>
+                    <View style={styles.title}>
+                        <Text style={{fontSize: 15}}>
+                            1. 수동 Up 버튼을 통해 블라인더를 모두 올려주세요.{"\n"}
+                            2. 설정값 셋팅 시작하기 버튼을 눌러주세요{"\n"}
+                            3. 블라인더가 설치된 창문에 적절하게 내려왔을 때 Stop 버튼을 눌러주세요
+                        </Text>
                     </View>
-                    
-                    <View style={styles.image}>
-                        <Text>코지샵 홈페이지 확인하기</Text>
-                        <Image source={{uri:'https://magazine.hankyung.com/magazinedata/images/photo/201610/04f58ba60df3617913675c235d9ac398.jpg'}}
-                        style={{width:'100%', height:'100%', resizeMode: 'contain'}}/>
+                    <View style={{flex: 1, flexDirection: 'row', alignItems: 'center',  borderColor: 'skyblue', backgroundColor:'skyblue', borderRadius: 50, marginBottom: 30}}>
+                        <View style={{height: '100%', width:'60%', alignItems: 'center', justifyContent: 'center', paddingLeft: 30}}>
+                            <Text style={{fontSize:40, color: 'white'}}> 현재 설정값: </Text>
+                        </View>
+                        <View style={{width:'40%', height: '100%', alignItems: 'flex-end',justifyContent:'center', paddingRight: 30}}>
+                            <Text style={{fontSize:35, fontWeight: 'bold', color: 'white'}}> {this.props.initPos/100} m</Text>
+                        </View>
                     </View>
-
-                    <View style={{flex: 1}}>
-                        <TouchableOpacity style={{flex:1, alignItems: 'center', justifyContent: 'center'}}
-                        onPress={() => this.props.navigation.navigate("Init")}>
-                            <View style={styles.button}>
-                                <Text style={{fontSize: 30, color: 'white', fontWeight: 'bold'}}>초기값 설정 페이지</Text> 
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={{flex:1, alignItems: 'center', justifyContent: 'center'}}
-                        onPress={()=>alert('블라인드 정보')}>
-                            <View style={styles.button}>
-                                <Text style={{fontSize: 30, color: 'white', fontWeight: 'bold'}}>기기 정보 확인하기</Text>
-                            </View>
-                        </TouchableOpacity>
+                    <View style={{width: '100%', height: '45%', flexDirection: 'row'}}>
+                        <View style={styles.setting}>
+                            <Text style={styles.buttonfont}>
+                                설정값 세팅
+                            </Text>
+                            <TouchableOpacity>
+                                <Icon name="play"
+                                size={50}
+                                color='lightskyblue' />
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                                <Icon name="closecircle"
+                                size={50}
+                                color='lightskyblue'
+                                onPress = {this.props.onPressInit}
+                            />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.auto}>
+                            <Text style={styles.buttonfont}>
+                                수동
+                            </Text>
+                            <UpButton />
+                            <DownButton />
+                        </View>
                     </View>
-
                 </View>
                 <View style={styles.footer}>
-                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSeleceted={false} />
-                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSeleceted={false} />
+                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSelected={false} />
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSelected={false} />
                     <SettingButton onPress={this.handleSettingButton.bind(this)} isSelected={true} />
                 </View>
             </View>
@@ -67,23 +82,39 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#ffffff',
     },
-    content:{
-        flex: 1,
-        width:'100%',
-    },
-    image:{
-        flex: 1,
+    title:{
+        height: '20%',
         padding: 20,
         alignItems: 'center',
         justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: 'skyblue',
+        marginTop: 50,
+        marginBottom: 30,
+        borderRadius: 50,
+        
+    },
+    content:{
+        flex: 1,
+        padding: 20,
     },
     button:{
-        width: '90%',
-        height: '80%',
+        flexDirection: 'row',
+    },
+    auto:{
+        flexDirection: 'column',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 50,
-        backgroundColor: 'skyblue',
+        flex: 1,
+    },
+    setting:{
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flex: 1,
+    },
+    buttonfont:{
+        fontSize: 30,
     },
     footer:{
         flexDirection: 'row',

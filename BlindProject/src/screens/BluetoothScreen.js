@@ -422,9 +422,9 @@ class BluetoothScreen extends Component {
                 </View>
 
                 <View style={styles.footer}>
-                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSeleceted={false} />
+                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSelected={false} />
                     <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSelected={true} />
-                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSeleceted={false} />
+                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSelected={false} />
                 </View>
 
             </View>
