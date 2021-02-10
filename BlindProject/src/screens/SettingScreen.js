@@ -53,9 +53,9 @@ class SettingScreen extends Component{
 
                 </View>
                 <View style={styles.footer}>
-                    <HomeButton onPress={this.handleHomeButton.bind(this)}/>
-                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} />
-                    <SettingButton onPress={this.handleSettingButton.bind(this)}/>
+                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSeleceted={false} />
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSeleceted={false} />
+                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSelected={true} />
                 </View>
             </View>
         );
@@ -89,8 +89,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '100%',
         height: '8%',
-        //marginTop: 50,
-    }
+        backgroundColor: '#f2f2f2'
+    },
 })
 
 export default SettingScreen;

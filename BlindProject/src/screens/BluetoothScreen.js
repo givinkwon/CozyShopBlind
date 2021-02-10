@@ -17,6 +17,9 @@ import BleManager from 'react-native-ble-manager';
 import Icon from 'react-native-vector-icons/AntDesign';
 import ConnectMoal from '../components/ConnectModal';
 import { stringToBytes } from 'convert-string';
+import BluetoothButton from '../components/BluetoothButton';
+import HomeButton from '../components/HomeButton';
+import SettingButton from '../components/SettingButton';
 
 
 const window = Dimensions.get('window');
@@ -30,18 +33,31 @@ class BluetoothScreen extends Component {
         super(props);
         this.state = {
             scanning: false,
-            connected: false,
+            //connected: false,
             modalVisible: false,
             peripherals: new Map(),
             connectedDeviceId: '',
+            selDeviceId: '',
             selDeviceName: '',
             selDeviceRssi: 0,
+            connection: false,
             appState: '',
         }
         this.handleAppStateChange = this.handleAppStateChange.bind(this);
         this.handleStopScan = this.handleStopScan.bind(this);
         this.handleDiscoverPeripheral = this.handleDiscoverPeripheral.bind(this);
+    }
 
+    handleHomeButton(){
+        this.props.navigation.navigate("Main");
+    }
+
+    handleSettingButton(){
+        this.props.navigation.navigate("Setting");
+    }
+    
+    handleBluetoothButton(){
+        this.props.navigation.navigate("Bluetooth");
     }
 
     componentDidMount(){
@@ -100,6 +116,7 @@ class BluetoothScreen extends Component {
 
     componentWillUnmount() {
         this.handlerDiscover.remove();
+        this.handlerStop.remove();
     }
 
     getAndroidPermission(per){
@@ -113,7 +130,7 @@ class BluetoothScreen extends Component {
                     } else {
                         console.log("User reject permission");
                     }
-                })
+                });
             }
         });
     }
@@ -162,42 +179,106 @@ class BluetoothScreen extends Component {
         this.setState({ peripherals });
     }
 
-    handleDataTransfer(deviceId){
-        BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
-            console.log("Peripheral info: ", peripheralInfo);
-            const sendData = stringToBytes("Hello Arduino");
+    // handleDataTransfer(deviceId){
+    //     BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
+    //         console.log("Peripheral info: ", peripheralInfo);
+    //         const sendData = stringToBytes("Hello Arduino");
 
-            const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
-            const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
+    //         const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
+    //         const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
 
-            console.log("service uuid: ", serviceUUID);
-            console.log("characteristic uuid: ", characteristicUUID);
+    //         console.log("service uuid: ", serviceUUID);
+    //         console.log("characteristic uuid: ", characteristicUUID);
         
-            BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
-               console.log("Write: ", sendData); 
-            })
-            .catch((error) => {
-                console.log("Write Error: ", error);
-            });
+    //         BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
+    //            console.log("Write: ", sendData); 
+    //         })
+    //         .catch((error) => {
+    //             console.log("Write Error: ", error);
+    //         });
+    //     })
+    //     .catch((error) => {
+    //         console.log("RetrieveServices Error: ", error);
+    //     });
+    // }
+
+    handleConnect = async (deviceId) => {
+        await BleManager.connect(deviceId).then(() => {
+            console.log("Connected");
         })
-        .catch((error) => {
-            console.log("RetrieveServices Error: ", error);
+        .catch((error) =>{
+            console.log("Connect Error: ", error);
+        });
+
+        BleManager.getConnectedPeripherals([]).then((results) => {
+            if (results.length == 0) {
+                console.log('No connected peripherals')
+            }
+            console.log(results);
+            var peripherals = this.state.peripherals;
+            for (var i = 0; i < results.length; i++) {
+                var peripheral = results[i];
+                peripheral.connected = true;
+                peripherals.set(peripheral.id, peripheral);
+                this.setState({ peripherals });
+            }
         });
     }
 
-    handleDisconnect(deviceId){
+    handleDisconnect = async (deviceId) => {
         BleManager.disconnect(deviceId).then(() => {
-            console.log("disconnected");
-            var connected = this.state.connected;
-            connected = false;
-            this.setState({ connected });
+            console.log("Disconnected");
         })
         .catch((error) => {
             console.log("Disconnect Error : ", error);
         });
+        let devices = this.state.peripherals;
+        let d = devices.get(deviceId);
+        if (d) {
+          d.connected = false;
+          devices.set(deviceId, d);
+          this.setState({ peripherals: devices });
+        }
     }
 
-    handleConnect(peripheral){
+    handleCreateBond = async (device) =>{
+        let isBonded = false;
+        await BleManager.getBondedPeripherals([]).then((bondedDevice) => {
+            bondedDevice.forEach((bondedDevice) => {
+                if(device.id === bondedDevice.id){
+                    isBonded = true;
+                    //console.log("isBonded is true");
+                }
+            })
+        })
+        .catch((error) => {
+            console.log("Get Bounded Device Error: ", error);
+        });
+        //console.log("isBonded: ", isBonded);
+        if(!isBonded){
+            BleManager.createBond(device.id, "000000").then(()=>{
+                console.log('CreatBond success');
+                
+            })
+            .catch((error) => {
+                console.log("Create Bond: ", error);
+            })
+        } else {
+            console.log("Bonding is already done");
+        }
+    }
+
+    handleRetrieveServices(device){
+        BleManager.retrieveServices(device.id).then((peripheralInfo) =>{
+            console.log("Peripheral Info: ", peripheralInfo);
+        })
+        .catch((error) => {
+            console.log("retrieveServices Error: ", error);
+        })
+    }
+    
+
+    handleModal(peripheral){
         const visible = this.modalVisible;
         // if(!this.state.connected){
         //     BleManager.connect(peripheral.id).then(() => {
@@ -227,20 +308,44 @@ class BluetoothScreen extends Component {
         //     });
         //     this.handleDisconnect(peripheral.id);
         // }
+        this.handleCreateBond(peripheral);
+        console.log("Connection state: ", peripheral.connected);
+        this.setState({ connection: peripheral.connected });
+        this.setState({ selDeviceId: peripheral.id });
         this.setState({ selDeviceName: peripheral.name });
         this.setState({ selDeviceRssi: peripheral.rssi });
         this.setModalVisible(!visible);
     }
 
+    setDeviceConnection(deviceId){
+        BleManager.isPeripheralConnected(deviceId, []).then((isConnected) => {
+            if (!isConnected) {
+                // Device is not connected
+                this.handleConnect(deviceId);
+            } else {
+                this.handleDisconnect(deviceId);
+            }
+        });
+    }
+
     renderItem(item) {
-        //const color = item.connected ? 'green' : '#ffffff';
+        const backgroundcolor = item.connected ? '#87ceea' : '#f6f6f6';
+        const textcolor = item.connected ? '#f0f9fd' : '#707070';
         if(item.name !== null){
             return(
-                <TouchableOpacity onPress={()=> this.handleConnect(item) }>
-                    <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
-                        <Text style={{fontSize: 15, textAlign: 'center', color: '#333333', padding: 10, fontWeight: 'bold', color: 'white'}}>{item.name}</Text>
-                        <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, fontWeight: 'bold', color: 'white'}}>RSSI: {item.rssi}</Text>
-                        <Text style={{fontSize: 8, textAlign: 'center', color: '#333333', padding: 2, paddingBottom: 20, fontWeight: 'bold', color: 'white'}}>{item.id}</Text>
+                <TouchableOpacity onPress={()=> this.handleModal(item) }>
+                    <View style={[styles.row, {margin: 9, backgroundColor: backgroundcolor,
+                                shadowColor: "#000",
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 6,
+                                },
+                                shadowOpacity: 0.58,
+                                shadowRadius: 6.00,
+                                elevation: 3, }]}>
+                        <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontWeight: 'bold', paddingVertical: 15,}}>{item.name}</Text>
+                        {/* <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, fontWeight: 'bold', color: 'black'}}></Text> */}
+                        <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, paddingBottom: 15,}}>RSSI: {item.rssi}</Text>
                     </View>
                 </TouchableOpacity>
             );
@@ -261,9 +366,11 @@ class BluetoothScreen extends Component {
         this.setState({ modalVisible: visible });
     }
     
-    onPressPositive = () => {
+    onPressPositive = (deviceId) => {
         const visible = this.state.modalVisible;
-        //console.log("넹");
+        //console.log("Id: ", deviceId);
+        this.setDeviceConnection(deviceId);
+
         this.setModalVisible(!visible);
     }
 
@@ -275,7 +382,7 @@ class BluetoothScreen extends Component {
 
     render(){
         const list = Array.from(this.state.peripherals.values());
-        const btnScanTitle = '주변기기 ' + (this.state.scanning ? '검색 중...' : '검색');
+        const btnScanTitle = '기기 ' + (this.state.scanning ? '검색 중...' : '검색하기');
 
         return(
             <View style={styles.container}>
@@ -284,15 +391,17 @@ class BluetoothScreen extends Component {
                     setModalVisible={this.setModalVisible.bind(this)}
                     deviceName={this.state.selDeviceName}
                     rssi={this.state.selDeviceRssi}
+                    deviceId={this.state.selDeviceId}
+                    connected={this.state.connection}
                     onPressPositive={this.onPressPositive.bind(this)}
                     onPressNegative={this.onPressNegative.bind(this)}
                 />
-                <View style={styles.content}>
+                <View style={styles.content1}>
                     <ScrollView style={styles.scroll}>
                         {(list.length == 0) &&
-                            <View style={{flex: 1, margin: 20}}>
+                            <View style={{flex: 1}}>
                                 <Image style={styles.image} source={require('../pic/ic_empty.png')} />
-                                <Text style={{textAlign: 'center', fontSize: 30}}>주변기기 없음</Text>
+                                <Text style={{textAlign: 'center', fontSize: 30, fontWeight: 'bold'}}>주변기기 없음</Text>
                             </View>
                         }
                         <FlatList
@@ -303,15 +412,21 @@ class BluetoothScreen extends Component {
                     </ScrollView>
                 </View>
 
-                <View style={styles.footer}>
-                    <TouchableOpacity style={{marginRight: 50, marginLeft: 50, justifyContent: 'center'}}
-                    onPress={()=>this.startScan()}>
-                        <View style={styles.button}>
-                            <Icon name='search1' size={40} color={'white'} />
-                            <Text style={{fontSize: 30, color: 'white'}}>{btnScanTitle}</Text> 
+                <View style={styles.content2}>
+                    <TouchableOpacity style={styles.button}
+                    onPress={()=>this.startScan()}> 
+                        <View>
+                            <Text style={{fontSize: 30, color: 'white', fontWeight: 'bold',}}>{btnScanTitle}</Text> 
                         </View>
                     </TouchableOpacity>
                 </View>
+
+                <View style={styles.footer}>
+                    <HomeButton onPress={this.handleHomeButton.bind(this)} isSeleceted={false} />
+                    <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSelected={true} />
+                    <SettingButton onPress={this.handleSettingButton.bind(this)} isSeleceted={false} />
+                </View>
+
             </View>
         );
     }
@@ -324,41 +439,44 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: '#ffffff',
     },
-    content:{
-        height: '80%',
+    content1:{
+        flex: 1,
+        marginTop: 50,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingTop: 50,
+        //paddingTop: 50,
     },
-    footer: {
+    content2: {
         width: '100%',
-        height: '20%',
+        height: '15%',
         alignItems: 'center',
         justifyContent: 'center',
         //backgroundColor: '#aeaeae',
     },
     scroll:{
-        // flex: 1,
+        flex: 1,
         width: '90%',
-        height: '100%',
+        // height: '100%',
     },
     button: {
-        width: '100%',
-        flexDirection: 'row',
-        backgroundColor: 'steelblue',
-        borderWidth: 2,
-        borderColor: 'steelblue',
+        width: '70%',
+        height: '50%',
+        backgroundColor: '#87ceea',
         borderRadius: 50,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
     },
     image:{
         width: '100%',
         resizeMode: 'contain',
-    }
+    },
+    footer:{
+        flexDirection: 'row',
+        width: '100%',
+        height: '8%',
+        backgroundColor: '#f2f2f2'
+    },
 })
 
 export default BluetoothScreen;

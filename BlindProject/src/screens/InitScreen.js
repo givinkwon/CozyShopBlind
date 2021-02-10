@@ -4,7 +4,7 @@ import HomeButton from '../components/HomeButton';
 import SettingButton from '../components/SettingButton';
 import UpButton from '../components/UpButton';
 import DownButton from '../components/DownButton';
-import Bluetoothbutton from '../components/BluetoothButton';
+import BluetoothButton from '../components/BluetoothButton';
 import Icon from 'react-native-vector-icons/AntDesign';
 
 class InitScreen extends Component {
@@ -20,7 +20,6 @@ class InitScreen extends Component {
     handleBluetoothButton(){
         this.props.navigation.navigate("Bluetooth");
     }
-
 
     render(){
         return (
@@ -121,8 +120,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '100%',
         height: '8%',
-        marginTop: 50,
-    }
+        backgroundColor: '#f2f2f2'
+    },
 })
 
 export default InitScreen;

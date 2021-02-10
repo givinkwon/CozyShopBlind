@@ -12,6 +12,8 @@ class ConnectModal extends Component {
     };
 
     render() {
+        const headerText = '아래 기기와 ' + (this.props.connected ? '해제' : '연결') + '하시겠습니까?';
+
         return (
                 <Modal
                     animationType='fade'
@@ -22,7 +24,7 @@ class ConnectModal extends Component {
                     <View style={styles.modalContainer} >
                         <View style={styles.modalView}>
                             <View style={styles.modalHeader}>
-                                <Text style={styles.headerText}>아래 기기와 연결하시겠습니까?</Text>
+                                <Text style={styles.headerText}>{headerText}</Text>
                             </View>
                             <View style={styles.modalContent}>
                                 <Text style={styles.contentName}>{this.props.deviceName}</Text>
@@ -30,11 +32,11 @@ class ConnectModal extends Component {
                             </View>
                             <View style={styles.modalFooter}>
                                 <TouchableOpacity style={styles.modalButtonPos}
-                                    onPress={this.props.onPressPositive}>
+                                    onPress={() => this.props.onPressPositive(this.props.deviceId)}>
                                         <Text style={styles.posButtonText}>예</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.modalButtonNeg}
-                                    onPress={this.props.onPressNegative}>
+                                    onPress={() => this.props.onPressNegative()}>
                                         <Text style={styles.negButtonText}>아니요</Text>
                                 </TouchableOpacity>
                             </View>

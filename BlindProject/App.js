@@ -35,7 +35,7 @@ class App extends Component{
 				screenOptions={{
 					headerShown: false
 				}}>
-					<Stack.Screen name="Bluetooth" component={BluetoothScreen}  />
+					<Stack.Screen name="Bluetooth" component={BluetoothScreen} />
 					<Stack.Screen name="Main" component={MainScreen} />
 					<Stack.Screen name="Setting" component={SettingScreen} />
 					{/* <Stack.Screen name="Init" component={({navigation})=><InitScreen initPos={this.state.initPos}/>}/> */}
