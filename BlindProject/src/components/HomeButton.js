@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 class HomeButton extends Component {
 
@@ -30,8 +30,8 @@ class HomeButton extends Component {
             <TouchableOpacity style={[styles.button, {borderTopWidth:borderwidth, borderTopColor:bordercolor}]}
             onPress={this.props.onPress}>
                 <View>
-                    <FontAwesome name="home"
-                    size={40}
+                    <MaterialCommunityIcons name="home-outline"
+                    size={44}
                     color={iconcolor}/>
                 </View>
             </TouchableOpacity>

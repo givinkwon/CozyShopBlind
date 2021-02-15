@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
-import Feather from 'react-native-vector-icons/Feather';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 class BluetoothButton extends Component {
 
@@ -30,7 +30,7 @@ class BluetoothButton extends Component {
             <TouchableOpacity style={[styles.button, {borderTopWidth:borderwidth, borderTopColor:bordercolor}]}
             onPress={this.props.onPress}>
                 <View>
-                    <Feather name="bluetooth"
+                    <FontAwesome name="bluetooth-b"
                     size={40}
                     color={iconcolor}/>
                 </View>
