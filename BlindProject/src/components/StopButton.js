@@ -1,3 +1,9 @@
+/*
+    블라인드의 초기값 설정을 끝낼 때 사용되는 버튼
+    버튼 터치 시 동작하는 함수와 버튼의 사이즈는 props 형태로 받아옴
+    TouchableOpacity 및 react-native-vector-icon 사용
+*/
+
 import React, { Component } from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';

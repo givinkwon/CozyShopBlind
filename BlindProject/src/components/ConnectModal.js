@@ -1,3 +1,10 @@
+/*
+    블루투스 기기 목록 중 한 개의 기기를 선택했을 때 나타나는 안내 문구 창
+    해당 기기와 연결/해제에 따른 예/아니오 선택지 제공
+    아니오 선택 시 아무런 동작도 하지 않고
+    예 선택 시 해당 기기와 connect or disconnect 기능 수행
+ */
+
 import React, { Component } from 'react';
 import { Modal,
     StyleSheet,
