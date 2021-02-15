@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.8)'
+        backgroundColor: 'rgba(255, 255, 255, 0.85)'
     },
     modalView: {
         width: '90%',
@@ -67,14 +67,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#f6f6f6',
-        shadowColor: '#000000',
+        shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 12,
         },
         shadowOpacity: 0.58,
         shadowRadius: 16.00,
-        elevation: 24,
+        elevation: 12,
         borderRadius: 20,
     },
     modalHeader: {
@@ -82,7 +82,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        //backgroundColor: 'green',
         paddingTop: 24,
     },
     headerText: {
@@ -95,7 +94,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        //backgroundColor: 'blue',
     },
     contentName: {
         fontWeight: 'bold',
@@ -121,17 +119,33 @@ const styles = StyleSheet.create({
         borderRadius: 53,
         backgroundColor: '#87ceea',
         marginLeft: 20,
+        shadowColor: "#000",
+        shadowOffset: {
+	        width: 0,
+	        height: 12,
+        },
+        shadowOpacity: 0.58,
+        shadowRadius: 16.00,
+        elevation: 3,
     },
     modalButtonNeg: {
         height: '60%',
         width: '35%',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#f6f6f6',
         borderRadius: 53,
         borderWidth: 1,
         borderColor: '#87ceea',
         marginRight: 20,
-
+        shadowColor: "#000",
+        shadowOffset: {
+	        width: 0,
+	        height: 12,
+        },
+        shadowOpacity: 0.58,
+        shadowRadius: 16.00,
+        elevation: 3,
     },
     posButtonText: {
         fontWeight: 'bold',
