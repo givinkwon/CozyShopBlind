@@ -178,28 +178,28 @@ class BluetoothScreen extends Component {
         this.setState({ peripherals });
     }
 
-    // handleDataTransfer(deviceId){
-    //     BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
-    //         console.log("Peripheral info: ", peripheralInfo);
-    //         const sendData = stringToBytes("Hello Arduino");
+    handleDataTransfer(deviceId){
+        BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
+            console.log("Peripheral info: ", peripheralInfo);
+            const sendData = stringToBytes("Hello Arduino");
 
-    //         const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
-    //         const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
+            const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
+            const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
 
-    //         console.log("service uuid: ", serviceUUID);
-    //         console.log("characteristic uuid: ", characteristicUUID);
+            console.log("service uuid: ", serviceUUID);
+            console.log("characteristic uuid: ", characteristicUUID);
         
-    //         BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
-    //            console.log("Write: ", sendData); 
-    //         })
-    //         .catch((error) => {
-    //             console.log("Write Error: ", error);
-    //         });
-    //     })
-    //     .catch((error) => {
-    //         console.log("RetrieveServices Error: ", error);
-    //     });
-    // }
+            BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
+               console.log("Write: ", sendData); 
+            })
+            .catch((error) => {
+                console.log("Write Error: ", error);
+            });
+        })
+        .catch((error) => {
+            console.log("RetrieveServices Error: ", error);
+        });
+    }
 
     handleConnect = async (deviceId) => {
         await BleManager.connect(deviceId).then(() => {
@@ -246,16 +246,14 @@ class BluetoothScreen extends Component {
             bondedDevice.forEach((bondedDevice) => {
                 if(device.id === bondedDevice.id){
                     isBonded = true;
-                    //console.log("isBonded is true");
                 }
             })
         })
         .catch((error) => {
             console.log("Get Bounded Device Error: ", error);
         });
-        //console.log("isBonded: ", isBonded);
         if(!isBonded){
-            BleManager.createBond(device.id, "000000").then(()=>{
+            BleManager.createBond(device.id).then(()=>{
                 console.log('CreatBond success');
                 
             })
@@ -337,11 +335,11 @@ class BluetoothScreen extends Component {
                                 shadowColor: "#000",
                                 shadowOffset: {
                                     width: 0,
-                                    height: 6,
+                                    height: 12,
                                 },
                                 shadowOpacity: 0.58,
                                 shadowRadius: 6.00,
-                                elevation: 3, }]}>
+                                elevation: 6, }]}>
                         <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontWeight: 'bold', paddingVertical: 15,}}>{item.name}</Text>
                         {/* <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, fontWeight: 'bold', color: 'black'}}></Text> */}
                         <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, paddingBottom: 15,}}>RSSI: {item.rssi}</Text>

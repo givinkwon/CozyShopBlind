@@ -51,7 +51,7 @@ class SettingScreen extends Component {
                                 메모리 설정
                             </Text>
                             <View style={styles.buttonfield}>
-                                <StartButton size={50} />
+                                <StartButton size={50} onPress={this.props.onPressInit1}/>
                                 <StopButton size={50} onPress={this.props.onPressInit} />
                             </View>
                             
