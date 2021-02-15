@@ -27,7 +27,6 @@ class App extends Component{
 	}
 
 	render(){
-		
 		return (
 			<NavigationContainer>
 				<Stack.Navigator initialRouteName="Bluetooth"
@@ -36,7 +35,7 @@ class App extends Component{
 				}}>
 					<Stack.Screen name="Bluetooth" component={BluetoothScreen} />
 					<Stack.Screen name="Main" component={MainScreen} />
-					<Stack.Screen name="Setting" children= {({navigation})=><SettingScreen navigation={navigation} initPos={this.state.initPos} onPressInit = {this.setInitPos.bind(this)}/>} />
+					<Stack.Screen name="Setting" children= {({navigation})=><SettingScreen navigation={navigation} initPos={this.state.initPos} onPressInit={this.setInitPos.bind(this)}/>} />
 				</Stack.Navigator>
 			</NavigationContainer>
 		);

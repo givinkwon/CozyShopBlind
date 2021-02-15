@@ -11,14 +11,13 @@ import { FlatList,
     AppState,
     Platform,
     PermissionsAndroid,
-    Image,
+    Image
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import Icon from 'react-native-vector-icons/AntDesign';
 import ConnectMoal from '../components/ConnectModal';
 import { stringToBytes } from 'convert-string';
-import BluetoothButton from '../components/BluetoothButton';
 import HomeButton from '../components/HomeButton';
+import BluetoothButton from '../components/BluetoothButton';
 import SettingButton from '../components/SettingButton';
 
 
@@ -382,7 +381,7 @@ class BluetoothScreen extends Component {
 
     render(){
         const list = Array.from(this.state.peripherals.values());
-        const btnScanTitle = '기기 ' + (this.state.scanning ? '검색 중...' : '검색하기');
+        const btnScanTitle = '주변 기기 ' + (this.state.scanning ? '검색 중...' : '검색하기');
 
         return(
             <View style={styles.container}>
@@ -396,12 +395,15 @@ class BluetoothScreen extends Component {
                     onPressPositive={this.onPressPositive.bind(this)}
                     onPressNegative={this.onPressNegative.bind(this)}
                 />
+                <View style={styles.header}>
+                    <Image source={require('../pic/ic_logo.png')} style={styles.image} />
+                </View>
                 <View style={styles.content1}>
                     <ScrollView style={styles.scroll}>
                         {(list.length == 0) &&
                             <View style={{flex: 1}}>
-                                <Image style={styles.image} source={require('../pic/ic_empty.png')} />
-                                <Text style={{textAlign: 'center', fontSize: 30, fontWeight: 'bold'}}>주변기기 없음</Text>
+                                {/* <Image style={styles.image} source={require('../pic/ic_empty.png')} />
+                                <Text style={{textAlign: 'center', fontSize: 30, fontWeight: 'bold'}}>주변기기 없음</Text> */}
                             </View>
                         }
                         <FlatList
@@ -439,25 +441,37 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: '#ffffff',
     },
+    header: {
+        width: '100%',
+        height: '8%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f2f2f2',
+        shadowColor: "#000",
+        shadowOffset: {
+	        width: 0,
+	        height: 12,
+        },
+        shadowOpacity: 0.58,
+        shadowRadius: 16.00,
+        elevation: 24,
+    },
     content1:{
         flex: 1,
-        marginTop: 50,
+        marginTop: 30,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        //paddingTop: 50,
     },
     content2: {
         width: '100%',
-        height: '15%',
+        height: '17%',
         alignItems: 'center',
         justifyContent: 'center',
-        //backgroundColor: '#aeaeae',
     },
     scroll:{
         flex: 1,
         width: '90%',
-        // height: '100%',
     },
     button: {
         width: '70%',

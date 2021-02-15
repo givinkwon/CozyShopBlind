@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground } from 'react-native';
 import HomeButton from '../components/HomeButton';
 import SettingButton from '../components/SettingButton';
+import BluetoothButton from '../components/BluetoothButton';
 import UpButton from '../components/UpButton';
 import DownButton from '../components/DownButton';
-import BluetoothButton from '../components/BluetoothButton';
 
 class MainScreen extends Component {
 
@@ -24,27 +24,15 @@ class MainScreen extends Component {
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text>로고</Text>
-                    <Image source={{uri:'https://pds.saramin.co.kr/company/logo/202011/09/qjijdt_urc5-1cs92y6_logo.jpg'}}
-                    style={{height:'100%', width: '100%', resizeMode: 'contain'}}/>
-                </View>
-                <View style={styles.title}>
-                    <Text>이미지 및 설명</Text>
-                    <Image source={{uri:'https://www.cozyshop.kr/shop/data/editor/godo_mall/blind/2020_dexter_wood/dexter_wood_02.jpg'}}
-                        style={{height:'100%', width:'100%', resizeMode:'contain'}}
-                        />
+                    <Image source={require('../pic/ic_logo.png')} style={styles.image} />
                 </View>
                 <View style={styles.content}>
-                    <View style={styles.auto}>
-                        <Text style={styles.buttonfont}>자동</Text>
-                        <UpButton />
-                        <DownButton />
-                    </View>
-                    <View style={styles.manu}>
-                        <Text style={styles.buttonfont}>수동</Text>
-                        <UpButton />
-                        <DownButton />
-                    </View>
+                    <ImageBackground source={require('../pic/ic_background.png')} style={styles.bgimage} resizeMode='contain'>
+                        <View style={styles.buttonfield}>
+                            <UpButton size={50} />
+                            <DownButton size={50} />
+                        </View>
+                    </ImageBackground>
                 </View>
                 <View style={styles.footer}>
                     <HomeButton onPress={this.handleHomeButton.bind(this)} isSelected={true} />
@@ -63,36 +51,53 @@ const styles = StyleSheet.create({
     },
     header: {
         width: '100%',
-        height: '10%',
-        paddingRight: 200,
-        alignItems: 'center',
-    },
-    title:{
-        width: '100%',
-        height: '40%',
-        paddingLeft: 20,
-        paddingRight: 20,
+        height: '8%',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#f2f2f2',
+        shadowColor: "#000",
+        shadowOffset: {
+	        width: 0,
+	        height: 12,
+        },
+        shadowOpacity: 0.58,
+        shadowRadius: 16.00,
+        elevation: 24,
+    },
+    image: {
+        flex: 1,
+        resizeMode: 'contain',
     },
     content:{
         flex: 1,
-        flexDirection: 'row',
-    },
-    auto:{
-        flexDirection: 'column',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        flex: 1,
+        justifyContent: 'center',
+        marginVertical: 40,
     },
-    manu:{
-        flexDirection: 'column',
-        justifyContent: 'space-between',
+    bgimage: {
+        flex: 1,
+        width: '100%',
         alignItems: 'center',
-        flex: 1,
+        justifyContent: 'center',
     },
-    buttonfont:{
-        fontSize: 30,
+    buttonfield:{
+        width: 80,
+        height: 210,
+        position: 'absolute',
+        backgroundColor: '#f6f6f6',
+        borderRadius: 53,
+        top: 210,
+        left: 205,
+        shadowColor: "#000",
+        shadowOffset: {
+	        width: 0,
+	        height: 12,
+        },
+        shadowOpacity: 0.58,
+        shadowRadius: 16.00,
+        elevation: 4,
+        alignItems: 'center',
+        justifyContent: 'space-around',
     },
     footer:{
         flexDirection: 'row',
@@ -100,6 +105,7 @@ const styles = StyleSheet.create({
         height: '8%',
         backgroundColor: '#f2f2f2'
     },
+    
 })
 
 export default MainScreen;

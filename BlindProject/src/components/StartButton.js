@@ -6,7 +6,7 @@ class DownButton extends Component{
     render(){
         return(
             <TouchableOpacity style={styles.button}>
-                <Icon name="downcircle"
+                <Icon name="play"
                 size={this.props.size}
                 color='#87ceea'></Icon>
             </TouchableOpacity>
