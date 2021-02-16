@@ -1,3 +1,30 @@
+/*
+    초기값 설정을 위한 Screen
+    Container: Screen을 관리하는 View
+    ├ header: 스크린 상단에 표시되는 Cozyshop Logo를 관리하는 View
+    ├ title: 블라인드 초기값 설정에 대한 워딩을 관리하는 View
+    │ ├ text1: 초기값 설정 방법 워딩 제목
+    │ └ text2: 초기값 설정 방법 워딩
+    ├ content1: 블라인드의 현재 길이를 표시하기 위한 View(flexDirection: row)
+    │ ├ view1: 워딩이 static한 부분의 view
+    │ └ view2: 워딩이 변경되는 부분의 view(블라인드의 현재 길이 표시)
+    ├ content2: 초기값 설정에 필요한 두 종류의 버튼을 관리하는 View(flexDirection: row)
+    │ ├ view1: 초기값 설정 중 메모리 설정과 관련된 버튼을 관리하는 View
+    │ │ ├ text: 메모리 설정 워딩
+    │ │ └ button view: 2개의 버튼을 관리하는 View
+    │ │   ├ start button: 
+    │ │   └ stop button:
+    │ └ view2: 초기값 설정 중 높이 설정과 관련된 버튼을 관리하는 View
+    │   ├ text: 높이 설정 워딩
+    │   └ button view: 2개의 버튼을 관리하는 View
+    │     ├ up button: 
+    │     └ down button:
+    └ footer: 현재 활성화 되어있는 스크린을 표시하고 이동할 스크린을 선택할 수 있는 버튼이 있는 View
+      ├ HomeButton: touch 시 handleHomeButton이 호출되며 MainScreen으로 이동됨
+      ├ BluetoothButton: touch 시 handleBluetoothButton이 호출되며 BluetoothScreen으로 이동됨
+      └ SettingButton: touch 시 handleSettingButton이 호출되며 SettingScreen으로 이동됨
+*/
+
 import React, { Component } from 'react';
 import { Text, View, StyleSheet, Image } from 'react-native';
 import UpButton from '../components/UpButton';

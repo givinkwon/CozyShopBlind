@@ -1,5 +1,5 @@
 /*
-    블라인드를 아래로 동작시키기 위한 Up 버튼
+    블라인드를 위로 동작시키기 위한 Up 버튼
     버튼 터치 시 동작하는 함수와 버튼의 사이즈는 props 형태로 받아옴
     TouchableOpacity 및 react-native-vector-icon 사용
 */
@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 class UpButton extends Component{
     render(){
         return(
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={this.props.onPress}>
                 <Icon name="upcircle"
                 size={this.props.size}
                 color='#87ceea' />

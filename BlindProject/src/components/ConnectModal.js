@@ -22,12 +22,33 @@ class ConnectModal extends Component {
         const headerText = '아래 기기와 ' + (this.props.connected ? '해제' : '연결') + '하시겠습니까?';
 
         return (
+                /*
+                    Modal Component props
+                    animationType: modal 창이 표시될 때의 animation 효과
+                    trasparent: true modal View의 backgroundColor를 지정해주지 않았을 때 modal 창의 뒷편(기존창)이 보임
+                    visible: visible이 true일 때 modal창이 표시됨
+                    onRequestClose: 하드웨어의 back button을 눌러 modal을 close할 때 수행할 작업
+                */
                 <Modal
                     animationType='fade'
                     transparent={true}
                     visible={this.props.modalVisible}
                     onRequestClose={this.props.setModalVisible}
                 >
+                    {/*
+                        Modal visible props이 true일 때 표시되는 View
+                        
+                        Container: 뒷 배경 blur 처리가 되는 것처럼 유사하게 하기 위해 만든 View
+                        └ View: Modal창 중 안내 창의 최상위 View
+                          ├ Header: 기기와 연결할 지 해지할지 질의하는 View
+                          │ └ headerText: props 형태로 받아온 connected에 따라 워딩이 연결/해제로 변경됨
+                          ├ Content: 연결/해지 할 기기의 정보를 표시하는 View
+                          │ ├ contentName: device의 이름 - props 형태로 부모 컴포넌트로부터 받아옴
+                          │ └ contentRssi: device의 신호 강도(rssi) - props 형태로 부모 컴포넌트로부터 받아옴
+                          └ Footer: 예/아니요 버튼이 들어가는 View
+                            ├ modalButtonPos: 예 버튼 - props 형태로 부모 컴포넌트로부터 onPress 함수를 받아옴
+                            └ modalButtonNeg: 아니요 버튼 - props 형태로 부모 컴포넌트로부터 onPress 함수를 받아옴
+                    */}
                     <View style={styles.modalContainer} >
                         <View style={styles.modalView}>
                             <View style={styles.modalHeader}>

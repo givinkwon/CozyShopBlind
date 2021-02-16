@@ -11,8 +11,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 class DownButton extends Component{
     render(){
         return(
-            <TouchableOpacity style={styles.button}
-            onPress = {this.props.onPress}>
+            <TouchableOpacity style={styles.button} onPress = {this.props.onPress}>
                 <Icon name="pausecircle"
                 size={this.props.size}
                 color='#87ceea' />
