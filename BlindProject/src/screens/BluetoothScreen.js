@@ -1,3 +1,19 @@
+/*
+    ┌──────────────────────────────────┐
+    │     블루투스 연결을 위한 screen    │
+    └──────────────────────────────────┘
+    Container: Screen을 관리하는 View
+    ├ header: 스크린 상단에 표시되는 Cozyshop Logo를 관리하는 View
+    ├ content1: 블라인드의 현재 길이를 표시하기 위한 View(flexDirection: row)
+    │ └ ScrollView: Scan된 블루투스 기기를 관리하는 View
+    │   └ FlatList: Scan되어 저장된 기기 목록을 renderItem props로 아이템별로 렌더링 진행
+    ├ content2: 초기값 설정에 필요한 두 종류의 버튼을 관리하는 View(flexDirection: row)
+    │ └ button: 기기 scan을 활성화하는 버튼
+    └ footer: 현재 활성화 되어있는 스크린을 표시하고 이동할 스크린을 선택할 수 있는 버튼이 있는 View
+      ├ HomeButton: touch 시 handleHomeButton이 호출되며 MainScreen으로 이동됨
+      ├ BluetoothButton: touch 시 handleBluetoothButton이 호출되며 BluetoothScreen으로 이동됨
+      └ SettingButton: touch 시 handleSettingButton이 호출되며 SettingScreen으로 이동됨
+*/
 import React, { Component } from 'react';
 import { FlatList,
     View,
@@ -30,9 +46,18 @@ class BluetoothScreen extends Component {
 
     constructor(props){
         super(props);
+
+        /*
+            scanning: 현재 bluetooth device를 scan중인지의 여부 파악
+            modalVisible: 기기와 연결을 요청하는 modal창의 활성화 여부 파악
+            peripherals: scan된 주변 기기들의 advertising data모아 객체형태로 저장하는 공간
+            connectedDeviceId: 현재 연결되어있는 deviceId(현재 활용 X)
+            selDeviceId, Name, Rssi: 주변기기 목록 중 선택한 기기의 Id, Name, Rssi 정보
+            connection: Modal 표시 시, 연결/해제 워딩 설정을 위해 현재 선택된 기기의 connection 상태를 가짐
+            appState: 현재 앱이 foreground인지 background인지를 저장
+        */
         this.state = {
             scanning: false,
-            //connected: false,
             modalVisible: false,
             peripherals: new Map(),
             connectedDeviceId: '',
@@ -59,14 +84,19 @@ class BluetoothScreen extends Component {
         this.props.navigation.navigate("Bluetooth");
     }
 
+    /*
+        생명주기 메소드. 해당 컴포넌트가 생성될 때 실행되는 함수로
+        1. AppState를 등록
+        2. BleManager start 함수 실행
+        3. Bluetooth 연결과 관련된 이벤트리스너 추가
+        4. Android API >= 29 -> ACCESS_FINE_LOCATION permission 요청
+           Android API <= 28 -> ACCESS_COARSE_LOCATION permission 요청
+           -> Bluetooth Scan을 위해 기기의 위치정보 필요
+    */
     componentDidMount(){
-        console.log("===== Start componentDidMount =====");
-
         AppState.addEventListener('change', this.handleAppStateChange);
 
-        BleManager.start().then(()=>{
-            console.log("BleManager Start!");
-        })
+        BleManager.start().then(()=>{});
 
         this.handlerDiscover = bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', this.handleDiscoverPeripheral);
         this.handlerStop = bleManagerEmitter.addListener('BleManagerStopScan', this.handleStopScan);
@@ -79,45 +109,36 @@ class BluetoothScreen extends Component {
             this.getAndroidPermission(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
         }
 
-        BleManager.getBondedPeripherals([]).then((devices) => {
-            if(devices.length != 0){
-                devices.forEach((device) => {
-                    console.log("Bonded Device INFO: ", device);
-                });
-            } else {
-                console.log("No Bonded Device");
-            }
-        })
-        .catch((err) => {
-            console.log("Get Bonded Peripherals Error: ", err);
-        });
-
-        // const getBondedDevice = async () => {
-        //     try{
-        //         const devices = await BleManager.getBondedPeripherals([]);
-        //         if(devices.length != 0){
-        //             devices.forEach((device) => {
-        //                 console.log("Bonded Device INFO: ", device);
-        //             });
-        //         } else {
-        //             console.log("No Bonded Device");
-        //         }
-        //         console.log("try End");
-        //         console.log(devices);
-        //     } catch(err) {
-        //         console.log("Get Bonded Peripherals Error: ", err);
+        // BleManager.getBondedPeripherals([]).then((devices) => {
+        //     if(devices.length != 0){
+        //         devices.forEach((device) => {
+        //             console.log("Bonded Device INFO: ", device);
+        //         });
+        //     } else {
+        //         console.log("No Bonded Device");
         //     }
-        // };
-
-        // getBondedDevice();
-        
+        // })
+        // .catch((err) => {
+        //     console.log("Get Bonded Peripherals Error: ", err);
+        // });        
     }
 
+    /*
+        생명주기 메소드. 해당 컴포넌트가 사라질 때 호출되는 함수
+    */
     componentWillUnmount() {
         this.handlerDiscover.remove();
         this.handlerStop.remove();
     }
 
+    /*
+        Android Permission을 요청하기 위해 작성한 함수
+        param: request할 permission
+        
+        몇 가지 보안을 신경써야하는 permission을 제외한 permission들은
+        AndroidManifest에서 uses-permission으로 작성하는 것 만으로도 permission이 허가되지만
+        위치정보나 카메라, 전화번호부와 관련된 permission은 request를 보내줘야 함
+    */
     getAndroidPermission(per){
         PermissionsAndroid.check(per).then((result) =>{
             if (result){
@@ -134,6 +155,11 @@ class BluetoothScreen extends Component {
         });
     }
 
+    /*
+        AppState의 값이 변경될 때 발생되는 이벤트에 의해 호출되는 함수
+        현재 앱의 상태가 background 상태이고, 다음 앱의 상태가 active일 때
+        앱이 foreground로 돌아왔음을 알리고, 현재 연결/페어링 되어있는 기기들의 목록을 디버깅함
+    */
     handleAppStateChange(nextAppState) {
         if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
             console.log('App has come to the foreground!')
@@ -151,23 +177,42 @@ class BluetoothScreen extends Component {
         this.setState({appState: nextAppState});
     }
 
+    /*
+        bluetooth 주변기기 scan을 시작하는 함수
+        1. scan 시작 전 Bluetooth를 사용할 수 있는지 확인
+        2. Bluetooth가 사용 가능할 경우 Scan 시작
+           param
+            [] : service UUID
+            10 : scan 할 시간(초 단위). 10초 이후 scan stop 관련 이벤트 발생 및 이후 scan stop까지 좀 더 걸릴 수도
+            false : duplicate(?) 관련 parameter
+    */
     startScan(){
         BleManager.enableBluetooth().then(()=>{
             if(!this.state.scanning){
                 this.setState({peripherals: new Map()});
                 BleManager.scan([], 10, false).then((results) => {
-                    console.log('Scanning...');
+                    // console.log('Scanning...');
                     this.setState({scanning: true});
                 })
             }
         });
     }
 
+    /*
+        주변기기 Scan 이후 scan 시간이 다되어 Scan stop 관련 이벤트가 발생되면 이벤트 리스너에 의해 호출되는 함수
+        scanning state를 false로 바꾸어 scan 버튼의 워딩을 바꿈
+    */
     handleStopScan(){
-        console.log('Scan is stopped');
+        // console.log('Scan is stopped');
         this.setState({ scanning: false });
     }
 
+
+    /*
+        주변기기 Scan 중 주변기기가 발견될 때 이벤트가 발생되면 이벤트 리스너에 의해 호출되는 함수
+        param: 기기의 advertising 정보
+        발견된 주변기기 중 name이 null인 경우를 제외하고 screen component의 state에 해당 기기 정보 추가
+    */
     handleDiscoverPeripheral(peripheral){
         var peripherals = this.state.peripherals;
         //console.log('Got ble peripheral', peripheral);
@@ -178,29 +223,10 @@ class BluetoothScreen extends Component {
         this.setState({ peripherals });
     }
 
-    handleDataTransfer(deviceId){
-        BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
-            console.log("Peripheral info: ", peripheralInfo);
-            const sendData = stringToBytes("Hello Arduino");
 
-            const serviceUUID = '0000FFE0-0000-1000-8000-00805F9B34FB';
-            const characteristicUUID = '0000FFE1-0000-1000-8000-00805F9B34FB';
+    /*
 
-            console.log("service uuid: ", serviceUUID);
-            console.log("characteristic uuid: ", characteristicUUID);
-        
-            BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
-               console.log("Write: ", sendData); 
-            })
-            .catch((error) => {
-                console.log("Write Error: ", error);
-            });
-        })
-        .catch((error) => {
-            console.log("RetrieveServices Error: ", error);
-        });
-    }
-
+    */
     handleConnect = async (deviceId) => {
         await BleManager.connect(deviceId).then(() => {
             console.log("Connected");
@@ -211,19 +237,22 @@ class BluetoothScreen extends Component {
 
         BleManager.getConnectedPeripherals([]).then((results) => {
             if (results.length == 0) {
-                console.log('No connected peripherals')
-            }
-            console.log(results);
-            var peripherals = this.state.peripherals;
-            for (var i = 0; i < results.length; i++) {
-                var peripheral = results[i];
-                peripheral.connected = true;
-                peripherals.set(peripheral.id, peripheral);
-                this.setState({ peripherals });
+                // console.log('No connected peripherals')
+            } else {
+                var peripherals = this.state.peripherals;
+                for (var i = 0; i < results.length; i++) {
+                    var peripheral = results[i];
+                    peripheral.connected = true;
+                    peripherals.set(peripheral.id, peripheral);
+                    this.setState({ peripherals });
+                }
             }
         });
     }
 
+    /*
+    
+    */
     handleDisconnect = async (deviceId) => {
         BleManager.disconnect(deviceId).then(() => {
             console.log("Disconnected");
@@ -240,6 +269,9 @@ class BluetoothScreen extends Component {
         }
     }
 
+    /*
+    
+    */
     handleCreateBond = async (device) =>{
         let isBonded = false;
         await BleManager.getBondedPeripherals([]).then((bondedDevice) => {
@@ -265,6 +297,9 @@ class BluetoothScreen extends Component {
         }
     }
 
+    /*
+    
+    */
     handleRetrieveServices(device){
         BleManager.retrieveServices(device.id).then((peripheralInfo) =>{
             console.log("Peripheral Info: ", peripheralInfo);
@@ -274,39 +309,12 @@ class BluetoothScreen extends Component {
         })
     }
     
+    /*
 
+    */
     handleModal(peripheral){
         const visible = this.modalVisible;
-        // if(!this.state.connected){
-        //     BleManager.connect(peripheral.id).then(() => {
-        //         console.log("connected");
-        //         var connected = this.state.connected;
-        //         connected = true;
-        //         this.setState({ connected });
-        //         //this.handleDataTransfer(peripheral.id);
-        //         BleManager.createBond(peripheral.id, "000000").then(() => {
-        //             console.log("create bond success or there is already an existing one");
-        //         })
-        //         .catch((error) => {
-        //             console.log("fail to bond[" + error + "]")
-        //             this.handleDisconnect(peripheral.id);
-        //         });
-        //     })
-        //     .catch((error) => {
-        //         console.log("Connect Error: ", error);
-        //         this.handleDisconnect(peripheral.id);
-        //     });
-        // } else{
-        //     BleManager.removeBond(peripheral.id).then(() => {
-        //         console.log("Remove bonded device success");
-        //     })
-        //     .catch((error) => {
-        //         console.log("Remove Bond Error: ", error);
-        //     });
-        //     this.handleDisconnect(peripheral.id);
-        // }
         this.handleCreateBond(peripheral);
-        console.log("Connection state: ", peripheral.connected);
         this.setState({ connection: peripheral.connected });
         this.setState({ selDeviceId: peripheral.id });
         this.setState({ selDeviceName: peripheral.name });
@@ -314,66 +322,66 @@ class BluetoothScreen extends Component {
         this.setModalVisible(!visible);
     }
 
+    /*
+
+    */
     setDeviceConnection(deviceId){
         BleManager.isPeripheralConnected(deviceId, []).then((isConnected) => {
             if (!isConnected) {
-                // Device is not connected
+                // 선택한 기기가 연결되어 있지 않았을 경우
                 this.handleConnect(deviceId);
             } else {
+                // 선택한 기기가 연결되어 있는 경우
                 this.handleDisconnect(deviceId);
             }
         });
     }
 
+    /*
+    
+    */
     renderItem(item) {
         const backgroundcolor = item.connected ? '#87ceea' : '#f6f6f6';
         const textcolor = item.connected ? '#f0f9fd' : '#707070';
-        if(item.name !== null){
-            return(
-                <TouchableOpacity onPress={()=> this.handleModal(item) }>
-                    <View style={[styles.row, {margin: 9, backgroundColor: backgroundcolor,
-                                shadowColor: "#000",
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 12,
-                                },
-                                shadowOpacity: 0.58,
-                                shadowRadius: 6.00,
-                                elevation: 6, }]}>
-                        <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontWeight: 'bold', paddingVertical: 15,}}>{item.name}</Text>
-                        {/* <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, fontWeight: 'bold', color: 'black'}}></Text> */}
-                        <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, paddingBottom: 15,}}>RSSI: {item.rssi}</Text>
-                    </View>
-                </TouchableOpacity>
-            );
-        }
-        //else {
-        //     return(
-        //         <TouchableOpacity onPress={()=> this.handleConnect() }>
-        //             <View style={[styles.row, {margin: 1, backgroundColor: 'skyblue', }]}>
-        //                 <Text style={{fontSize: 15, textAlign: 'center', color: '#333333', padding: 10, fontWeight: 'bold', color: 'white'}}>{item.id}</Text>
-        //                 <Text style={{fontSize: 10, textAlign: 'center', color: '#333333', padding: 2, paddingBottom: 20, fontWeight: 'bold', color: 'white'}}>RSSI: {item.rssi}</Text>
-        //             </View>
-        //         </TouchableOpacity>
-        //     );
-        // } 
+        return(
+            <TouchableOpacity onPress={()=> this.handleModal(item) }>
+                <View style={[styles.row, {margin: 9, backgroundColor: backgroundcolor,
+                            shadowColor: "#000",
+                            shadowOffset: {
+                                width: 0,
+                                height: 12,
+                            },
+                            shadowOpacity: 0.58,
+                            shadowRadius: 6.00,
+                            elevation: 6, }]}>
+                    <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontWeight: 'bold', paddingVertical: 15,}}>{item.name}</Text>
+                    <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, paddingBottom: 15,}}>RSSI: {item.rssi}</Text>
+                </View>
+            </TouchableOpacity>
+        );
     }
     
+    /*
+    
+    */
     setModalVisible = (visible) => {
         this.setState({ modalVisible: visible });
     }
     
+    /*
+    
+    */
     onPressPositive = (deviceId) => {
         const visible = this.state.modalVisible;
-        //console.log("Id: ", deviceId);
         this.setDeviceConnection(deviceId);
-
         this.setModalVisible(!visible);
     }
 
+    /*
+
+     */
     onPressNegative = () => {
         const visible = this.state.modalVisible;
-        //console.log("아니요");
         this.setModalVisible(!visible);
     }
 
@@ -398,12 +406,6 @@ class BluetoothScreen extends Component {
                 </View>
                 <View style={styles.content1}>
                     <ScrollView style={styles.scroll}>
-                        {(list.length == 0) &&
-                            <View style={{flex: 1}}>
-                                {/* <Image style={styles.image} source={require('../pic/ic_empty.png')} />
-                                <Text style={{textAlign: 'center', fontSize: 30, fontWeight: 'bold'}}>주변기기 없음</Text> */}
-                            </View>
-                        }
                         <FlatList
                             data={list}
                             renderItem={({ item }) => this.renderItem(item) }
@@ -411,7 +413,6 @@ class BluetoothScreen extends Component {
                         />
                     </ScrollView>
                 </View>
-
                 <View style={styles.content2}>
                     <TouchableOpacity style={styles.button}
                     onPress={()=>this.startScan()}> 
@@ -420,13 +421,11 @@ class BluetoothScreen extends Component {
                         </View>
                     </TouchableOpacity>
                 </View>
-
                 <View style={styles.footer}>
                     <HomeButton onPress={this.handleHomeButton.bind(this)} isSelected={false} />
                     <BluetoothButton onPress={this.handleBluetoothButton.bind(this)} isSelected={true} />
                     <SettingButton onPress={this.handleSettingButton.bind(this)} isSelected={false} />
                 </View>
-
             </View>
         );
     }
