@@ -40,6 +40,13 @@ class App extends Component{
 		}
 	};
 
+	/*
+		실제 데이터를 보내는 함수
+		param: 데이터를 보내려는 device의 Id
+		retrieveServices를 호출해 device의 advertising 정보가 아닌 service,characteristic UUID 정보를 검색한 후
+		serial comm을 위한 service,characteristic UUID을 이용해 실제 데이터를 전송함.
+		이 때, 데이터는 stringToBytes를 사용해 byte형으로 변경해준 후 전송해야 함.
+	*/
 	handleDataTransfer(deviceId){
         BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
             console.log("Peripheral info: ", peripheralInfo);

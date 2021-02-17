@@ -163,16 +163,16 @@ class BluetoothScreen extends Component {
     handleAppStateChange(nextAppState) {
         if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
             console.log('App has come to the foreground!')
-            BleManager.getConnectedPeripherals([]).then((peripheralsArray) => {
-                peripheralsArray.forEach((device) => {
-                    console.log("Connected Device: " , device);
-                });
-            });
-            BleManager.getBondedPeripherals([]).then((bondedDevice) => {
-                bondedDevice.forEach((device) => {
-                    console.log("Bonded Device: ", device);
-                })
-            })
+            // BleManager.getConnectedPeripherals([]).then((peripheralsArray) => {
+            //     peripheralsArray.forEach((device) => {
+            //         console.log("Connected Device: " , device);
+            //     });
+            // });
+            // BleManager.getBondedPeripherals([]).then((bondedDevice) => {
+            //     bondedDevice.forEach((device) => {
+            //         console.log("Bonded Device: ", device);
+            //     })
+            // })
         }
         this.setState({appState: nextAppState});
     }
@@ -207,7 +207,6 @@ class BluetoothScreen extends Component {
         this.setState({ scanning: false });
     }
 
-
     /*
         주변기기 Scan 중 주변기기가 발견될 때 이벤트가 발생되면 이벤트 리스너에 의해 호출되는 함수
         param: 기기의 advertising 정보
@@ -225,7 +224,10 @@ class BluetoothScreen extends Component {
 
 
     /*
-
+        기기가 연결되어 있지 않았을 때 Modal창의 "예"를 선택했을 때 호출되는 함수
+        param: connect 하려는 device ID
+        connect 이후 connect가 되면 device 정보(객체)에 connected 필드를 추가한 후 true로 설정하고
+        screen component의 state인 peripheral 정보 update
     */
     handleConnect = async (deviceId) => {
         await BleManager.connect(deviceId).then(() => {
@@ -251,7 +253,10 @@ class BluetoothScreen extends Component {
     }
 
     /*
-    
+        기기가 연결되어 있을 때 Modal창의 "예"를 선택했을 때 호출되는 함수
+        param: disconnect 하려는 device ID
+        disconnect 이후 device 정보(객체) connected 필드값 false로 설정후
+        screen component의 state인 peripheral 정보 update
     */
     handleDisconnect = async (deviceId) => {
         BleManager.disconnect(deviceId).then(() => {
@@ -270,7 +275,11 @@ class BluetoothScreen extends Component {
     }
 
     /*
-    
+        주변기기 리스트 중 하나를 택했을 때 handleModal에 의해 실행되는 함수
+        param: bonding 하려는 device 객체
+        리스트 중 하나를 택했을 때 해당 기기가 기존에 bonding 되어있는 지 확인 후
+        bonding이 되어있으면 아무 작업도 하지 않고
+        bonding이 되어있지 않으면 페어링 진행
     */
     handleCreateBond = async (device) =>{
         let isBonded = false;
@@ -296,21 +305,15 @@ class BluetoothScreen extends Component {
             console.log("Bonding is already done");
         }
     }
-
+   
     /*
-    
-    */
-    handleRetrieveServices(device){
-        BleManager.retrieveServices(device.id).then((peripheralInfo) =>{
-            console.log("Peripheral Info: ", peripheralInfo);
-        })
-        .catch((error) => {
-            console.log("retrieveServices Error: ", error);
-        })
-    }
-    
-    /*
-
+        주변기기 리스트 중 하나를 택했을 때 Modal 창을 띄우기 위해 실행되는 함수
+        param: 선택한 device 객체
+        modal component에 props 형태로 들어가는 visible의 값을 설정하기 전,
+        1. bonding 여부를 파악하고
+        2. 선택 기기의 렌더링 되는 색을 변경하기 위해 쓰이는 connection을 설정하고,
+        3. 선택한 기기의 id, name, rssi를 받아 온 후
+        4. setModalVisible을 호출해 현재 visible의 값과 반대로 설정(modal을 활성화하는 역할)
     */
     handleModal(peripheral){
         const visible = this.modalVisible;
@@ -323,7 +326,10 @@ class BluetoothScreen extends Component {
     }
 
     /*
-
+        device의 connection을 결정하는 함수, Modal창을 띄울 때, "예"를 터치하는 시점에 호출됨
+        param: device의 Id
+        "예"를 선택했을 때 device가 connect 되어있으면 handleConnect를 호출하고,
+        device가 disconnect 되어있으면 handleDisconnect를 호출함.
     */
     setDeviceConnection(deviceId){
         BleManager.isPeripheralConnected(deviceId, []).then((isConnected) => {
@@ -338,7 +344,9 @@ class BluetoothScreen extends Component {
     }
 
     /*
-    
+        scan 된 기기들을 렌더링 하는 함수. Flatlist의 props로 들어감
+        param: item - Flatlist의 아이템 하나하나
+        배경색과 글자색은 item 객체의 connected 필드값에 의해 결정됨
     */
     renderItem(item) {
         const backgroundcolor = item.connected ? '#87ceea' : '#f6f6f6';
@@ -362,14 +370,16 @@ class BluetoothScreen extends Component {
     }
     
     /*
-    
+        visible을 받아 현재 state값으로 설정하는 함수
     */
     setModalVisible = (visible) => {
         this.setState({ modalVisible: visible });
     }
     
     /*
-    
+        modal 창에서 "예"를 선택했을 시 실행되는 함수
+        param: modal로 넘겨받은 deviceId
+        connection을 결정한 후 modal visible도 설정(modal을 비활성화 하는 역할)
     */
     onPressPositive = (deviceId) => {
         const visible = this.state.modalVisible;
@@ -378,7 +388,8 @@ class BluetoothScreen extends Component {
     }
 
     /*
-
+        modal 창에서 "아니오"를 선택했을 시 실행되는 함수
+        modal visible 설정(modal을 비활성화 하는 역할)
      */
     onPressNegative = () => {
         const visible = this.state.modalVisible;
