@@ -99,30 +99,31 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     modalHeader: {
-        flex: 1,
+        flex: 2,
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
-        paddingTop: 24,
+        paddingTop: 12,
     },
     headerText: {
         fontSize: 22,
-        fontWeight: 'bold',
+        fontFamily: 'NotoSansKR-Bold',
         color: '#707070',
     },
     modalContent: {
-        flex: 3,
+        flex: 2,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
     },
     contentName: {
-        fontWeight: 'bold',
-        fontSize: 22,
+        fontFamily: 'NotoSansKR-Bold',
+        fontSize: 20,
         color: '#707070',
     },
     contentRssi: {
-        fontSize: 17,
+        fontFamily: 'NotoSansKR-Regular',
+        fontSize: 15,
         color: '#707070',
     },
     modalFooter: {
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     modalButtonPos: {
-        height: '60%',
+        height: '55%',
         width: '35%',
         alignItems: 'center',
         justifyContent: 'center',
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     modalButtonNeg: {
-        height: '60%',
+        height: '55%',
         width: '35%',
         alignItems: 'center',
         justifyContent: 'center',
@@ -169,13 +170,13 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     posButtonText: {
-        fontWeight: 'bold',
-        fontSize: 22,
+        fontFamily: 'NotoSansKR-Bold',
+        fontSize: 20,
         color: '#ffffff',
     },
     negButtonText: {
-        fontWeight: 'bold',
-        fontSize: 22,
+        fontFamily: 'NotoSansKR-Bold',
+        fontSize: 20,
         color: '#87ceea',
     },
 });

@@ -11,12 +11,8 @@
 			   각각의 스크린에서 navigation 객체의 navigator 함수를 통해 다른 스크린으로 이동할 수 있음
 			   (parameter: Stack.Screen으로 등록한 Screen의 name)
 
-	- state ┌ initPos: Setting 페이지에서 보여질 현재 블라인드의 길이를 저장하는 state
-			└ peripheralId: Bluetooth 페이지에서 연결된 기기의 Id값을 저장하는 state(현재 활용 x)
+	- state ─ peripheralId: Bluetooth 페이지에서 연결된 기기의 Id값을 저장하는 state(현재 활용 x)
 	
-	- setInitPos: test용 함수. setting 페이지에서 stop 버튼을 누를마다 호출되며
-				  랜덤값을 뽑아내 변동 시 UI에 영향이 있는지 test하기 위함
-
 	- handleDataTransfer: 버튼 touch 시 적절한 데이터를 보내기 위한 함수
 						  현재는 test용 데이터만 전송되도록 되어있음
 						  데이터 전송시 convert-string의 stringToBytes함수를 이용해
@@ -41,17 +37,8 @@ class App extends Component{
 		super(props);
 		this.state = {
 			peripheralId: '',
-			initPos: 0,
 		}
 	};
-
-	setInitPos = () => {
-		const randomInt = Math.floor(Math.random()*300);
-
-		this.setState({
-			initPos: randomInt
-		});
-	}
 
 	handleDataTransfer(deviceId){
         BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
@@ -90,8 +77,6 @@ class App extends Component{
 					<Stack.Screen name="Bluetooth" component={BluetoothScreen} />
 					<Stack.Screen name="Main" component={MainScreen} />
 					<Stack.Screen name="Setting" children= {({navigation})=><SettingScreen navigation={navigation}
-						initPos={this.state.initPos}
-						onPressInit={this.setInitPos.bind(this)}
 						onPressInit1={()=>this.handleDataTransfer("F8:30:02:3F:24:B9")}/>} />
 				</Stack.Navigator>
 			</NavigationContainer>

@@ -354,8 +354,8 @@ class BluetoothScreen extends Component {
                             shadowOpacity: 0.58,
                             shadowRadius: 6.00,
                             elevation: 6, }]}>
-                    <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontWeight: 'bold', paddingVertical: 15,}}>{item.name}</Text>
-                    <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, paddingBottom: 15,}}>RSSI: {item.rssi}</Text>
+                    <Text style={{fontSize: 16, textAlign: 'center', color: textcolor, fontFamily:'NotoSansKR-Bold', paddingTop: 5,}}>{item.name}</Text>
+                    <Text style={{fontSize: 13, textAlign: 'center', color: textcolor, fontFamily:'NotoSansKR-Regular', paddingBottom: 5,}}>RSSI: {item.rssi}</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -417,7 +417,7 @@ class BluetoothScreen extends Component {
                     <TouchableOpacity style={styles.button}
                     onPress={()=>this.startScan()}> 
                         <View>
-                            <Text style={{fontSize: 30, color: 'white', fontWeight: 'bold',}}>{btnScanTitle}</Text> 
+                            <Text style={{fontSize: 30, color: 'white', fontFamily: 'NotoSansKR-Medium'}}>{btnScanTitle}</Text> 
                         </View>
                     </TouchableOpacity>
                 </View>
