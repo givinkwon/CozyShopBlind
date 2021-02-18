@@ -181,7 +181,7 @@ class BluetoothScreen extends Component {
         bluetooth 주변기기 scan을 시작하는 함수
         1. scan 시작 전 Bluetooth를 사용할 수 있는지 확인
         2. Bluetooth가 사용 가능할 경우 Scan 시작
-           param
+           params
             [] : service UUID
             10 : scan 할 시간(초 단위). 10초 이후 scan stop 관련 이벤트 발생 및 이후 scan stop까지 좀 더 걸릴 수도
             false : duplicate(?) 관련 parameter
@@ -230,6 +230,9 @@ class BluetoothScreen extends Component {
         screen component의 state인 peripheral 정보 update
     */
     handleConnect = async (deviceId) => {
+        /*
+            connect: device(Id)와 블루투스 연결 시도. promise 객체를 반환함.
+        */
         await BleManager.connect(deviceId).then(() => {
             console.log("Connected");
         })
@@ -237,15 +240,30 @@ class BluetoothScreen extends Component {
             console.log("Connect Error: ", error);
         });
 
+        /*
+            getConnectedPeripherals: 현재 어플리케이션과 연결되어 있는 블루투스 기기들의 객체 array를 반환
+            param: serviceUUID
+        */
         BleManager.getConnectedPeripherals([]).then((results) => {
             if (results.length == 0) {
                 // console.log('No connected peripherals')
             } else {
+                // 하나의 변수를 선언해 현재 peripherals state 저장
                 var peripherals = this.state.peripherals;
+
+                // 블루투스 기기들의 객체 array를 하나씩 검사
                 for (var i = 0; i < results.length; i++) {
+                    // 하나의 변수를 선언해 한 개의 블루투스 객체 저장
                     var peripheral = results[i];
+
+                    // 해당 객체에 connected 필드를 추가해 연결이 되어있다는 의미로서 true로 초기화
                     peripheral.connected = true;
+
+                    // peripherals map 객체를 기기의 id를 key값으로 하여 update
+                    //  -> 연결된 peripheral들의 객체 정보에 connected = true 가 추가됨
                     peripherals.set(peripheral.id, peripheral);
+                    
+                    // peripherals를 컴포넌트의 state로 update
                     this.setState({ peripherals });
                 }
             }
@@ -259,12 +277,13 @@ class BluetoothScreen extends Component {
         screen component의 state인 peripheral 정보 update
     */
     handleDisconnect = async (deviceId) => {
-        BleManager.disconnect(deviceId).then(() => {
+        await BleManager.disconnect(deviceId).then(() => {
             console.log("Disconnected");
         })
         .catch((error) => {
             console.log("Disconnect Error : ", error);
         });
+        // disconnect 후 connect와 반대 과정으로 
         let devices = this.state.peripherals;
         let d = devices.get(deviceId);
         if (d) {
@@ -283,6 +302,13 @@ class BluetoothScreen extends Component {
     */
     handleCreateBond = async (device) =>{
         let isBonded = false;
+        /*
+            getBondedPeripherals: 현재 device에 bonding/pairing 되어있는 기기들의 정보를 가져옴
+            param: serviceUUID
+            bonding 되어있는 기기들의 id를 하나씩 검사하면서 선택한 device와 id가 같은 기기가 있으면
+            (기존에 boding이 되어있으면)
+            선언해둔 isBonded를 true로 변경
+        */
         await BleManager.getBondedPeripherals([]).then((bondedDevice) => {
             bondedDevice.forEach((bondedDevice) => {
                 if(device.id === bondedDevice.id){
@@ -293,7 +319,16 @@ class BluetoothScreen extends Component {
         .catch((error) => {
             console.log("Get Bounded Device Error: ", error);
         });
+
+        /*
+            기기가 기존에 bonding 되어있는지 검사 후 bonding이 되어있지 않으면 bonding을 진행하고
+            bonding이 되어있으면 아무런 작업도 하지 않음
+        */
         if(!isBonded){
+            /*
+                creatBond: 기기의 id를 받아 bonding을 진행함. bonding 절차는 Android 기기 OS에 의존성을 두고 진행됨
+                param: bonding을 진행하려는 device id
+            */
             BleManager.createBond(device.id).then(()=>{
                 console.log('CreatBond success');
                 

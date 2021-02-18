@@ -48,8 +48,19 @@ class App extends Component{
 		이 때, 데이터는 stringToBytes를 사용해 byte형으로 변경해준 후 전송해야 함.
 	*/
 	handleDataTransfer(deviceId){
-        BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
+        /*
+			retrieveServices: react-native-ble-manager에서 지원하는 함수 검색 대상 device가 지원하는 service, characteristic을 찾음
+			param: device ID - format: "XX-XX-XX-XX-XX-XX"
+			getBondedPeripheral 및 getConnectedPeripheral, Scan을 통해 얻은 device들의 정보들은 advertising data로,
+			해당 기기가 어떤 service를 제공하는지 알 수 없다.
+			retrieveServices를 호출하면 목표 기기의 service, characteristic UUID를 받을 수 있다.
+			이 때, service와 characteristic UUID는 "XXXX"의 4바이트 씩 주어지는데
+			"0000XXXX-0000-1000-8000-00805F9B34FB"의 XXXX 부분을 수정하면 serial communication을 제공하는 UUID가 된다(가정)
+			해당 UUID를 write 함수에 매개변수로 넘겨주면, 해당 기기로 어플리케이션이 데이터를 전송할 수 있게 된다.
+		*/
+		BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
             console.log("Peripheral info: ", peripheralInfo);
+			
             const sendData = stringToBytes("Hello Arduino");
 			
 			// serial comm을 위한 service UUID 
