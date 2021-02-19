@@ -33,8 +33,18 @@ import StopButton from '../components/StopButton';
 import HomeButton from '../components/HomeButton';
 import BluetoothButton from '../components/BluetoothButton';
 import SettingButton from '../components/SettingButton';
+import BleManager from 'react-native-ble-manager';
+import { stringToBytes } from 'convert-string';
 
 class SettingScreen extends Component {
+
+    constructor(props){
+        super(props);
+        this.state={
+            isUp: false,
+            isDown: false,
+        }
+    }
 
     handleHomeButton() {
         this.props.navigation.navigate("Main");
@@ -46,6 +56,78 @@ class SettingScreen extends Component {
     
     handleBluetoothButton() {
         this.props.navigation.navigate("Bluetooth");
+    }
+
+    handleBlindUp = () => {
+        this.dataTransfer('AUUPST');
+        this.setState({isUp: true});
+    }
+
+    handleBlindDown = () => {
+        this.dataTransfer('AUDNST');
+        this.setState({isDown: true});
+    }
+
+    handleBlindSave = () => {
+        if (this.state.isUp){
+            this.dataTransfer('SAVEPT');
+            this.setState({isUp: false});
+        } else if(this.state.isDown){
+            this.dataTransfer('SAVEPT');
+            this.setState({isUp: false});
+        }
+    }
+
+	/*
+		실제 데이터를 보내는 함수
+		param: 데이터를 보내려는 device의 Id
+		retrieveServices를 호출해 device의 advertising 정보가 아닌 service,characteristic UUID 정보를 검색한 후
+		serial comm을 위한 service,characteristic UUID을 이용해 실제 데이터를 전송함.
+		이 때, 데이터는 stringToBytes를 사용해 byte형으로 변경해준 후 전송해야 함.
+	*/
+	dataTransfer(data){
+        /*
+			retrieveServices: react-native-ble-manager에서 지원하는 함수 검색 대상 device가 지원하는 service, characteristic을 찾음
+			param: device ID - format: "XX-XX-XX-XX-XX-XX"
+			getBondedPeripheral 및 getConnectedPeripheral, Scan을 통해 얻은 device들의 정보들은 advertising data로,
+			해당 기기가 어떤 service를 제공하는지 알 수 없다.
+			retrieveServices를 호출하면 목표 기기의 service, characteristic UUID를 받을 수 있다.
+			이 때, service와 characteristic UUID는 "XXXX"의 4바이트 씩 주어지는데
+			"0000XXXX-0000-1000-8000-00805F9B34FB"의 XXXX 부분을 수정하면 serial communication을 제공하는 UUID가 된다(가정)
+			해당 UUID를 write 함수에 매개변수로 넘겨주면, 해당 기기로 어플리케이션이 데이터를 전송할 수 있게 된다.
+		*/
+
+        const deviceId = this.props.deviceId;
+
+		console.log(deviceId);
+
+		BleManager.retrieveServices(deviceId).then((peripheralInfo) =>{
+            console.log("Peripheral info: ", peripheralInfo);
+			
+			// Data Format: $XXXXXX;
+            const prefix = "$";
+			const suffix = ";";
+			const sendData = stringToBytes(prefix + data + suffix);
+
+			// serial comm을 위한 service UUID 
+            const serviceUUID = '0000FFF0-0000-1000-8000-00805F9B34FB';
+            
+			// serial comm을 위한 characteristic UUID
+			const characteristicUUID = '0000FFF1-0000-1000-8000-00805F9B34FB';
+
+            console.log("service uuid: ", serviceUUID);
+            console.log("characteristic uuid: ", characteristicUUID);
+        
+            BleManager.write(deviceId, serviceUUID, characteristicUUID, sendData).then(() => {
+               console.log("Write: ", sendData); 
+            })
+            .catch((error) => {
+                console.log("Write Error: ", error);
+            });
+        })
+        .catch((error) => {
+            console.log("RetrieveServices Error: ", error);
+        });
     }
 
     render(){
@@ -69,8 +151,8 @@ class SettingScreen extends Component {
                                 메모리 설정
                             </Text>
                             <View style={styles.buttonfield}>
-                                <StartButton size={50} onPress={this.props.onPressInit1}/>
-                                <StopButton size={50} />
+                                <StartButton size={50} onPress={this.handleBlindSave} />
+                                <StopButton size={50} onPress={this.handleBlindSave} />
                             </View>
                             
                         </View>
@@ -79,8 +161,8 @@ class SettingScreen extends Component {
                                 높이 설정
                             </Text>
                             <View style={styles.buttonfield}>
-                                <UpButton size={50} />
-                                <DownButton size={50}/>
+                                <UpButton size={50} onPress={this.handleBlindUp} />
+                                <DownButton size={50} onPress={this.handleBlindDown} />
                             </View>
                             
                         </View>
