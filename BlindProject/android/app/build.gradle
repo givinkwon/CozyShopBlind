@@ -135,7 +135,14 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // ndk {
+        //  abiFilters "armeabi-v7a", "x86"    
+        // }
     }
+    // size 최적화
+    //def enableSeparateBuildPerCPUArchitecture = true
+    //def enableProguardInReleaseBuilds = true
+    
     splits {
         abi {
             reset()
@@ -152,13 +159,18 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                storePassword MYAPP_UPLOAD_STORE_PASSWORD
-                keyAlias MYAPP_UPLOAD_KEY_ALIAS
-                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-            }
+            //if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+            //    storeFile file(MYAPP_UPLOAD_STORE_FILE)
+            //    storePassword MYAPP_UPLOAD_STORE_PASSWORD
+            //    keyAlias MYAPP_UPLOAD_KEY_ALIAS
+            //    keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            //}
+            storeFile file('cozyshop.keystore')
+            storePassword 'ajumsee12#'
+            keyAlias 'cozyshop'
+            keyPassword 'ajumsee12#'
         }
+        
 
     }
     buildTypes {
@@ -172,6 +184,8 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            shrinkResources true
+            minifyEnabled true
         }
     }
 
