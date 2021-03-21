@@ -456,7 +456,7 @@ class BluetoothScreen extends Component {
                     <TouchableOpacity style={styles.button}
                     onPress={()=>this.startScan()}> 
                         <View>
-                            <Text style={{fontSize: 30, color: 'white', fontFamily: 'NotoSansKR-Medium'}}>{btnScanTitle}</Text> 
+                            <Text style={{height : 80, fontSize: 30, color: 'white', fontFamily: 'NotoSansKR-Medium'}}>{btnScanTitle}</Text> 
                         </View>
                     </TouchableOpacity>
                 </View>

@@ -59,13 +59,33 @@ class SettingScreen extends Component {
     }
 
     handleBlindUp = () => {
-        this.dataTransfer('AUUPST');
-        this.setState({isUp: true});
+        const isUp = this.state.isUp;
+        const isDown = this.state.isDown;
+        if (!isUp && !isDown){
+            this.dataTransfer('AUUPST');
+            this.setState({isUp: true});
+        } else if(isUp) {
+            this.dataTransfer('AUUPSP');
+            this.setState({isUp: false});
+        } else if(isDown) {
+            this.dataTransfer('AUDNSP');
+            this.setState({isDown: false});
+        }
     }
 
     handleBlindDown = () => {
-        this.dataTransfer('AUDNST');
-        this.setState({isDown: true});
+        const isUp = this.state.isUp;
+        const isDown = this.state.isDown;
+        if (!isUp && !isDown){
+            this.dataTransfer('AUDNST');
+            this.setState({isDown: true});
+        } else if(isUp) {
+            this.dataTransfer('AUUPSP');
+            this.setState({isUp: false});
+        } else if(isDown) {
+            this.dataTransfer('AUDNSP');
+            this.setState({isDown: false});
+        }
     }
 
     handleBlindSave = () => {
