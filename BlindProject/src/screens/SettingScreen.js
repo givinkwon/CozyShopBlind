@@ -64,12 +64,15 @@ class SettingScreen extends Component {
         if (!isUp && !isDown){
             this.dataTransfer('AUUPST');
             this.setState({isUp: true});
+            console.log('AUUPST')
         } else if(isUp) {
             this.dataTransfer('AUUPSP');
             this.setState({isUp: false});
+            console.log('AUUPSP')
         } else if(isDown) {
             this.dataTransfer('AUDNSP');
             this.setState({isDown: false});
+            console.log('AUDNSP')
         }
     }
 
@@ -79,22 +82,27 @@ class SettingScreen extends Component {
         if (!isUp && !isDown){
             this.dataTransfer('AUDNST');
             this.setState({isDown: true});
+            console.log('AUDNST')
         } else if(isUp) {
             this.dataTransfer('AUUPSP');
             this.setState({isUp: false});
+            console.log('AUUPSP')
         } else if(isDown) {
             this.dataTransfer('AUDNSP');
             this.setState({isDown: false});
+            console.log('AUDNSP')
         }
     }
 
-    handleBlindSave = () => {
-        if (this.state.isUp){
-            this.dataTransfer('SAVEPT');
+    handleBlindSave = (value) => {
+        if (value == "start"){
+            this.dataTransfer('SAVEST');
             this.setState({isUp: false});
-        } else if(this.state.isDown){
-            this.dataTransfer('SAVEPT');
+            console.log('SAVEST')
+        } else if(value == "stop"){
+            this.dataTransfer('SAVEEN');
             this.setState({isUp: false});
+            console.log('SAVEEN')
         }
     }
 
@@ -171,8 +179,8 @@ class SettingScreen extends Component {
                                 메모리 설정
                             </Text>
                             <View style={styles.buttonfield}>
-                                <StartButton size={50} onPress={this.handleBlindSave} />
-                                <StopButton size={50} onPress={this.handleBlindSave} />
+                                <StartButton size={50} onPress={() => this.handleBlindSave("start")} />
+                                <StopButton size={50} onPress={() => this.handleBlindSave("stop")} />
                             </View>
                             
                         </View>
