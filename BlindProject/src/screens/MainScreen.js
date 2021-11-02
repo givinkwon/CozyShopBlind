@@ -52,31 +52,33 @@ class MainScreen extends Component {
         console.log(this.props.deviceId);
         const isUp = this.state.isUp;
         const isDown = this.state.isDown;
-        if (!isUp && !isDown){
-            this.dataTransfer('AUUPST');
-            this.setState({isUp: true});
-        } else if(isUp) {
-            this.dataTransfer('AUUPSP');
-            this.setState({isUp: false});
-        } else if(isDown) {
-            this.dataTransfer('AUDNSP');
-            this.setState({isDown: false});
-        }
+        this.dataTransfer('AUTOUP');
+        // if (!isUp && !isDown){
+        //     this.dataTransfer('AUUPST');
+        //     this.setState({isUp: true});
+        // } else if(isUp) {
+        //     this.dataTransfer('AUUPSP');
+        //     this.setState({isUp: false});
+        // } else if(isDown) {
+        //     this.dataTransfer('AUDNSP');
+        //     this.setState({isDown: false});
+        // }
     }
 
     handleBlindDown = () => {
         const isUp = this.state.isUp;
         const isDown = this.state.isDown;
-        if (!isUp && !isDown){
-            this.dataTransfer('AUDNST');
-            this.setState({isDown: true});
-        } else if(isUp) {
-            this.dataTransfer('AUUPSP');
-            this.setState({isUp: false});
-        } else if(isDown) {
-            this.dataTransfer('AUDNSP');
-            this.setState({isDown: false});
-        }
+        this.dataTransfer('AUTODN');
+        // if (!isUp && !isDown){
+        //     this.dataTransfer('AUDNST');
+        //     this.setState({isDown: true});
+        // } else if(isUp) {
+        //     this.dataTransfer('AUUPSP');
+        //     this.setState({isUp: false});
+        // } else if(isDown) {
+        //     this.dataTransfer('AUDNSP');
+        //     this.setState({isDown: false});
+        // }
     }
 
 	/*
